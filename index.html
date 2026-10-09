@@ -1,0 +1,335 @@
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
+  <title>حافظتي السحابية الفائقة | Cloud Clipboard Pro</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+            code: ['Fira Code', 'Courier New', 'monospace']
+          },
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Cairo & Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Prism Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-autoloader.min.js"></script>
+
+  <!-- QR Code Generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(156, 163, 175, 0.7);
+    }
+    pre[class*="language-"] {
+      margin: 0 !important;
+      border-radius: 0.75rem !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200 antialiased selection:bg-brand-500 selection:text-white">
+
+  <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      
+      <!-- Brand Logo & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/20 text-lg">
+          <i class="fa-solid font-bold fa-cloud-arrow-up animate-pulse"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-brand-600 via-indigo-500 to-purple-500 bg-clip-text text-transparent">
+              حافظتي السحابية
+            </h1>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20">PRO</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">مزامنة سريعة وتشفير وتسجيلات صوتية</p>
+        </div>
+      </div>
+
+      <!-- Action & Navigation Controls -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        
+        <!-- PWA Install Button (Hidden by default, shows when installable) -->
+        <button id="pwaInstallBtn" onclick="installPWA()" class="hidden px-2.5 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/20 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-download"></i>
+          <span class="hidden sm:inline">تثبيت التطبيق</span>
+        </button>
+
+        <!-- QR Code Pairing Button -->
+        <button onclick="openQRModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-bold transition flex items-center gap-1.5" title="اقتران عبر رمز QR">
+          <i class="fa-solid fa-qrcode text-brand-500"></i>
+          <span class="hidden md:inline">اقتران سريع</span>
+        </button>
+
+        <!-- Trash Bin Button -->
+        <button onclick="openTrashModal()" class="relative p-2 rounded-xl bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs transition" title="سلة المهملات">
+          <i class="fa-solid fa-trash-can text-rose-500"></i>
+          <span id="trashBadge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center">0</span>
+        </button>
+
+        <!-- Device Badge -->
+        <span id="deviceBadge" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
+          <i id="deviceIcon" class="fa-solid fa-mobile-screen"></i>
+          <span id="deviceText">جاري التحديد...</span>
+        </span>
+
+        <!-- Theme Switcher -->
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition" title="تبديل المظهر">
+          <i class="fa-solid fa-moon dark:hidden"></i>
+          <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
+        </button>
+
+        <!-- User Info & Logout Button -->
+        <div id="userSection" class="hidden flex items-center gap-2 border-r border-slate-300 dark:border-slate-700 pr-3">
+          <div class="flex items-center gap-2">
+            <img id="userAvatar" src="https://placehold.co/100x100/3b82f6/ffffff?text=U" alt="المستخدم" class="w-8 h-8 rounded-full border border-brand-500 object-cover">
+            <span id="userName" class="text-xs sm:text-sm font-medium hidden md:inline max-w-[120px] truncate">مستخدم</span>
+          </div>
+          <button onclick="handleSignOut()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 transition flex items-center gap-1">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span class="hidden sm:inline">خروج</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+
+    <!-- Firebase Connection Warning Banner -->
+    <div id="firebaseNotice" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs sm:text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-triangle-exclamation text-xl shrink-0"></i>
+        <div>
+          <strong class="font-bold">وضع التشغيل المحلي النشط:</strong>
+          <span id="firebaseNoticeText">يعمل التطبيق في الوضع المحلي المحفوظ بجهازك. للمزامنة المباشرة السحابية تأكد من إكمال تفعيل خيارات Firebase في لوحتك.</span>
+        </div>
+      </div>
+      <button onclick="document.getElementById('firebaseNotice').classList.add('hidden')" class="text-xs underline font-bold shrink-0">إغلاق</button>
+    </div>
+
+    <!-- AUTHENTICATION CONTAINER -->
+    <div id="authContainer" class="max-w-md w-full mx-auto my-auto bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 transition-all">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center text-3xl">
+          <i class="fa-solid fa-paste"></i>
+        </div>
+        <h2 class="text-2xl font-bold">تسجيل الدخول للحافظة</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">سجّل الدخول لمزامنة الحافظة فورياً بين أجهزتك</p>
+      </div>
+
+      <!-- Auth Tabs -->
+      <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl mb-5 text-sm font-medium">
+        <button id="tabLogin" onclick="switchAuthTab('login')" class="flex-1 py-2 rounded-lg text-center bg-white dark:bg-slate-700 shadow-sm transition font-bold">تسجيل الدخول</button>
+        <button id="tabRegister" onclick="switchAuthTab('register')" class="flex-1 py-2 rounded-lg text-center text-slate-500 dark:text-slate-400 hover:text-slate-800 transition">حساب جديد</button>
+      </div>
+
+      <!-- Form Error Alert -->
+      <div id="authError" class="hidden mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-xs font-medium flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation text-base"></i>
+        <span id="authErrorMsg">خطأ في بيانات الدخول</span>
+      </div>
+
+      <!-- Auth Form -->
+      <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">البريد الإلكتروني</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400">
+              <i class="fa-regular fa-envelope"></i>
+            </span>
+            <input type="email" id="authEmail" required placeholder="name@example.com" class="w-full pr-10 pl-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 outline-none text-sm transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">كلمة المرور</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400">
+              <i class="fa-solid fa-lock"></i>
+            </span>
+            <input type="password" id="authPassword" required placeholder="••••••••" class="w-full pr-10 pl-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 outline-none text-sm transition">
+          </div>
+        </div>
+
+        <button type="submit" id="authSubmitBtn" class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-brand-500/25 hover:opacity-95 transition flex items-center justify-center gap-2">
+          <span>دخول</span>
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+      </form>
+
+      <div class="relative my-6 text-center">
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-800"></div></div>
+        <span class="relative bg-white dark:bg-slate-900 px-3 text-xs text-slate-400 font-medium">أو خيارات أخرى</span>
+      </div>
+
+      <!-- Guest Login Options -->
+      <div class="space-y-2.5">
+        <button onclick="handleGoogleSignIn()" class="w-full py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-semibold flex items-center justify-center gap-3 transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+          <span>الدخول بواسطة Google</span>
+        </button>
+
+        <button onclick="handleGuestSignIn()" class="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-bolt text-amber-500"></i>
+          <span>الدخول الفوري السريع (بدون حساب)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="dashboardContainer" class="hidden space-y-6">
+
+      <!-- INPUT BOX SECTION -->
+      <section class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-md border border-slate-200 dark:border-slate-800 relative">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <label for="clipInput" class="text-sm font-bold flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square text-brand-500"></i>
+            <span>إضافة عنصر جديد للحافظة:</span>
+          </label>
+          <div class="flex items-center gap-2">
+            <button onclick="pasteFromClipboard()" class="px-3 py-1.5 rounded-lg bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 hover:bg-brand-100 dark:hover:bg-brand-900/60 border border-brand-200 dark:border-brand-800 text-xs font-bold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-clipboard-check"></i>
+              <span>لصق المباشر</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Text Input Area -->
+        <div class="relative group">
+          <textarea id="clipInput" rows="3" placeholder="اكتب، الصق نصاً، رابطاً، كوداً برمجياً، أو سجل بصمة صوتية..." class="w-full p-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 focus:ring-2 focus:ring-brand-500 outline-none text-sm sm:text-base font-sans transition resize-y"></textarea>
+        </div>
+
+        <!-- Extra Tools Panel: Tags, PIN Lock, Auto Expire -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+          
+          <!-- Custom Tags Input -->
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-hashtag text-slate-400"></i>
+            <input type="text" id="tagInput" placeholder="وسم (مثال: عمل، دراسة)" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs outline-none focus:ring-1 focus:ring-brand-500">
+          </div>
+
+          <!-- Secret PIN Lock Check -->
+          <div class="flex items-center gap-2">
+            <label class="cursor-pointer flex items-center gap-2 text-slate-600 dark:text-slate-400 font-semibold select-none">
+              <input type="checkbox" id="secretCheck" onchange="toggleSecretPinInput()" class="rounded text-brand-600 focus:ring-brand-500">
+              <i class="fa-solid fa-lock text-purple-500"></i>
+              <span>تشفير برقم سري PIN</span>
+            </label>
+            <input type="password" id="secretPinInput" maxlength="4" placeholder="****" class="hidden w-16 px-2 py-1 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-center text-xs font-mono">
+          </div>
+
+          <!-- Auto Expiration Selector -->
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-amber-500"></i>
+            <span class="text-slate-500 dark:text-slate-400 font-semibold">حذف تلقائي:</span>
+            <select id="expireSelect" class="flex-1 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs outline-none">
+              <option value="never">أبداً</option>
+              <option value="1h">بعد ساعة</option>
+              <option value="24h">بعد 24 ساعة</option>
+              <option value="7d">بعد 7 أيام</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Action Buttons Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+          
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- File Input Trigger -->
+            <label class="cursor-pointer px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold flex items-center gap-2 transition">
+              <i class="fa-solid fa-paperclip text-brand-500 text-sm"></i>
+              <span>إرفاق ملف / صورة</span>
+              <input type="file" id="fileInput" onchange="handleFileSelect(event)" class="hidden">
+            </label>
+
+            <!-- Voice Record Button -->
+            <button id="recordVoiceBtn" onclick="toggleVoiceRecording()" class="px-3 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 hover:bg-rose-100 text-xs font-bold flex items-center gap-2 transition">
+              <i id="recordVoiceIcon" class="fa-solid fa-microphone"></i>
+              <span id="recordVoiceText">تسجيل صوتي</span>
+            </button>
+
+            <!-- Status Indicator -->
+            <span id="detectedTypePill" class="text-xs px-2.5 py-1 rounded-md bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 font-bold hidden flex items-center gap-1">
+              <i class="fa-solid fa-circle-check"></i>
+              <span id="detectedTypeName">تم إرفاق ملف</span>
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="clearInput()" class="px-3 py-2 rounded-xl text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-xs font-semibold transition">
+              تفريغ الخانة
+            </button>
+            <button onclick="saveClip()" id="saveBtn" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-brand-500/20 hover:opacity-95 transition flex items-center gap-2">
+              <i class="fa-solid fa-plus"></i>
+              <span>مزامنة للحافظة</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Search, Custom Tags & Filter Bar -->
+      <section class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </span>
+          <input type="text" id="searchInput" oninput="filterClips()" placeholder="بحث في الحافظة أو عبر الوسم #..." class="w-full pr-10 pl-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-brand-500 outline-none text-xs sm:text-sm transition">
+        </div>
+
+        <!-- Filter Options -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 text-xs font-semibold">
+          <button onclick="setFilter('all')" data-filter="all" class="filter-btn px-3 py-2 rounded-xl bg-brand-600 text-white shadow-sm whitespace-nowrap transition">الكل</button>
+          <butt
