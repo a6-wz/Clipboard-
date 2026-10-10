@@ -1,47 +1,44 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="dark">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الحافظة السحابية الذكية</title>
-    
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts: Cairo & Fira Code -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    
+    <!-- Google Fonts: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <!-- Highlight.js for Code Highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-
-    <!-- Firebase Compat SDKs -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Firebase SDKs (Compat v10.12.0) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#000000',
-                        cardbg: '#09090b',
-                        bordercolor: '#27272a'
+                        brand: {
+                            50: '#fafafa',
+                            100: '#f4f4f5',
+                            800: '#27272a',
+                            900: '#18181b',
+                            950: '#09090b',
+                        }
                     },
                     fontFamily: {
-                        sans: ['Cairo', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace'],
+                        cairo: ['Cairo', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
-    
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -49,657 +46,1009 @@
             color: #f4f4f5;
         }
         ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
+            width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
             background: #000000;
         }
         ::-webkit-scrollbar-thumb {
             background: #27272a;
-            border-radius: 9999px;
+            border-radius: 3px;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #3f3f46;
         }
-        .liquid-glass {
-            background: rgba(18, 18, 18, 0.75);
-            backdrop-filter: blur(16px);
+        .glass-card {
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-input {
+            background: rgba(24, 24, 27, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .glass-input:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            outline: none;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
-<body class="bg-black text-zinc-100 min-h-screen">
+<body class="min-h-screen flex flex-col justify-between selection:bg-zinc-800 selection:text-white">
 
-    <div id="app" class="max-w-4xl mx-auto px-4 py-6 flex flex-col min-h-screen">
-        
-        <!-- App Header with Explicit Login Button -->
-        <header class="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-zinc-800/80">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 border-b border-zinc-800/80 bg-black/90 backdrop-blur-md px-4 py-3">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white shadow-md">
-                    <i class="fa-solid fa-cloud text-lg"></i>
+                <div class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white shadow-inner">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight text-white">الحافظة السحابية الذكية</h1>
-                    <p class="text-xs text-zinc-400">حفظ ومزامنة فورية بين جميع أجهزتك</p>
+                    <h1 class="text-base font-bold text-white leading-tight">الحافظة السحابية الذكية</h1>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span id="connectionStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="connectionStatusText" class="text-xs text-zinc-400">سحابي متصل</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Login / User Profile Button Section -->
-            <div id="userAuthSection" class="flex items-center gap-2">
-                <button id="openAuthModalBtn" class="px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all flex items-center gap-2 shadow-lg">
-                    <i class="fa-solid fa-right-to-bracket"></i>
-                    <span>تسجيل الدخول</span>
+            <div class="flex items-center gap-2">
+                <!-- QR Code Modal Trigger -->
+                <button onclick="openQRModal()" title="رمز QR للموقع" class="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                    </svg>
+                </button>
+
+                <!-- Auth Buttons -->
+                <div id="authSection">
+                    <button id="loginBtn" onclick="openAuthModal()" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white text-black hover:bg-zinc-200 transition flex items-center gap-1.5 shadow">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                        </svg>
+                        <span>تسجيل الدخول</span>
+                    </button>
+                    <div id="userInfo" class="hidden flex items-center gap-2">
+                        <span id="userEmail" class="text-xs text-zinc-400 truncate max-w-[120px]"></span>
+                        <button onclick="logout()" title="تسجيل الخروج" class="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-red-400 hover:bg-red-950/40 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto w-full px-4 py-6 space-y-6 flex-1">
+
+        <!-- Input Box Section -->
+        <div class="glass-card rounded-2xl p-4 space-y-4 shadow-2xl">
+            <!-- Tabs (Type Selector) -->
+            <div class="flex items-center gap-1.5 border-b border-zinc-800/80 pb-3 overflow-x-auto no-scrollbar">
+                <button onclick="switchTab('text')" id="tab-text" class="tab-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap bg-zinc-800 text-white border border-zinc-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    <span>نص / رابط</span>
+                </button>
+
+                <button onclick="switchTab('code')" id="tab-code" class="tab-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                    </svg>
+                    <span>كود برمجي</span>
+                </button>
+
+                <button onclick="switchTab('file')" id="tab-file" class="tab-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                    </svg>
+                    <span>صورة / ملف (PDF, إلخ)</span>
+                </button>
+
+                <button onclick="switchTab('audio')" id="tab-audio" class="tab-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                    </svg>
+                    <span>تسجيل صوتي</span>
                 </button>
             </div>
-        </header>
 
-        <!-- New Clip Form -->
-        <div class="p-4 md:p-5 rounded-2xl bg-zinc-950 border border-zinc-800/80 mb-6">
-            
-            <!-- Type Selector Tabs (Explicit selection - No Auto Detect) -->
-            <div class="flex items-center gap-1.5 mb-3 overflow-x-auto pb-1 scrollbar-none border-b border-zinc-800/60">
-                <button type="button" class="type-tab-btn active-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-zinc-800 text-white flex items-center gap-1.5 whitespace-nowrap" data-type="text">
-                    <i class="fa-solid fa-font text-xs"></i> نص / رابط
-                </button>
-                <button type="button" class="type-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-zinc-400 hover:text-white hover:bg-zinc-900 flex items-center gap-1.5 whitespace-nowrap" data-type="code">
-                    <i class="fa-solid fa-code text-xs"></i> كود برمجي
-                </button>
-                <button type="button" class="type-tab-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-zinc-400 hover:text-white hover:bg-zinc-900 flex items-center gap-1.5 whitespace-nowrap" data-type="note">
-                    <i class="fa-solid fa-sticky-note text-xs"></i> ملاحظة
-                </button>
-            </div>
-
-            <!-- Code Language Selector (Appears only when "code" is selected) -->
-            <div id="langSelectContainer" class="hidden mb-3">
-                <label class="text-xs text-zinc-400 mb-1 block">اختر لغة البرمجة:</label>
-                <select id="codeLanguageSelect" class="w-full text-xs bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-xl px-3 py-2 outline-none">
+            <!-- Code Language Selector (Shown only when 'code' tab is active) -->
+            <div id="languageSelectorContainer" class="hidden flex items-center gap-2">
+                <label class="text-xs text-zinc-400 font-medium">لغة البرمجة:</label>
+                <select id="codeLanguage" class="glass-input text-xs rounded-xl px-3 py-1.5 text-white bg-zinc-900 border border-zinc-800 focus:border-zinc-600">
                     <option value="javascript">JavaScript</option>
                     <option value="python">Python</option>
                     <option value="cpp">C++</option>
+                    <option value="csharp">C#</option>
+                    <option value="java">Java</option>
                     <option value="html">HTML</option>
                     <option value="css">CSS</option>
                     <option value="php">PHP</option>
                     <option value="sql">SQL</option>
                     <option value="json">JSON</option>
-                    <option value="java">Java</option>
-                    <option value="csharp">C#</option>
+                    <option value="bash">Bash / Shell</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="go">Go</option>
+                    <option value="rust">Rust</option>
                 </select>
             </div>
 
-            <!-- Main Input Textarea -->
-            <div class="relative">
-                <textarea id="clipInput" rows="3" placeholder="أدخل النص، الرابط، أو الكود هنا..." class="w-full p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800 focus:border-zinc-500 outline-none text-zinc-100 text-sm resize-y font-sans transition-all placeholder:text-zinc-500"></textarea>
-            </div>
-
-            <!-- Additional Controls -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-3">
-                <div class="flex flex-wrap items-center gap-2">
-                    <input id="tagInput" type="text" placeholder="وسم (مثال: عمل, شخصي)" class="text-xs bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-xl px-3 py-1.5 outline-none w-36 placeholder:text-zinc-500">
-                    
-                    <label class="flex items-center gap-1.5 text-xs text-zinc-400 cursor-pointer bg-zinc-900 px-2.5 py-1.5 rounded-xl border border-zinc-800">
-                        <input type="checkbox" id="pinLockToggle" class="rounded bg-zinc-800 border-zinc-700 text-white focus:ring-0">
-                        <span>قفل بـ PIN</span>
-                    </label>
-                    <input id="pinInput" type="password" maxlength="4" placeholder="رمز PIN" class="hidden text-xs bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-xl px-2.5 py-1.5 outline-none w-20 text-center">
-                </div>
-
-                <div class="flex items-center gap-2 justify-end">
-                    <button id="quickPasteBtn" type="button" class="px-3 py-2 rounded-xl text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 transition-all flex items-center gap-1">
-                        <i class="fa-solid fa-paste"></i> لصق
-                    </button>
-                    <button id="addClipBtn" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-white hover:bg-zinc-200 text-black shadow-md transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>إضافة للحافظة</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Search and Filters -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5">
-            <div class="relative flex-1">
-                <i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 text-xs"></i>
-                <input id="searchInput" type="text" placeholder="ابحث في حافظتك..." class="w-full pr-9 pl-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-200 outline-none focus:border-zinc-600 transition-all">
-            </div>
-
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-                <button class="filter-btn active-filter px-3 py-1.5 rounded-xl text-xs font-medium transition-all bg-white text-black" data-filter="all">الكل</button>
-                <button class="filter-btn px-3 py-1.5 rounded-xl text-xs font-medium transition-all bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white" data-filter="pinned">المثبتة ⭐</button>
-                <button class="filter-btn px-3 py-1.5 rounded-xl text-xs font-medium transition-all bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white" data-filter="code">الأكواد 💻</button>
-                <button class="filter-btn px-3 py-1.5 rounded-xl text-xs font-medium transition-all bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white" data-filter="text">النصوص 📝</button>
-            </div>
-        </div>
-
-        <!-- Clips Grid -->
-        <div id="clipsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1 align-start">
-            <!-- Items rendered via JS -->
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="hidden flex-col items-center justify-center py-12 text-center">
-            <div class="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 text-xl mb-3">
-                <i class="fa-solid fa-inbox"></i>
-            </div>
-            <h3 class="text-sm font-bold text-zinc-300">لا توجد عناصر محفوظة</h3>
-            <p class="text-xs text-zinc-500 mt-1">أضف نصوصك وأكوادك هنا لمزامنتها مباشرة</p>
-        </div>
-    </div>
-
-    <!-- Authentication Modal -->
-    <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-        <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 max-w-sm w-full shadow-2xl relative">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-user-lock text-zinc-400"></i>
-                    تسجيل الدخول للمزامنة
-                </h3>
-                <button id="closeAuthModalBtn" class="text-zinc-500 hover:text-white text-base">
-                    <i class="fa-solid fa-xmark"></i>
+            <!-- Input Fields Area -->
+            <!-- 1. Text / Code Input Area -->
+            <div id="textInputArea" class="relative">
+                <textarea id="mainInput" rows="4" placeholder="اكتب أو الصق النصوص، الروابط، الملاحظات هنا... (Ctrl+V تعمل في أي مكان)"
+                    class="w-full glass-input rounded-xl p-3.5 text-sm text-white placeholder-zinc-500 resize-y focus:ring-1 focus:ring-zinc-600 transition"></textarea>
+                <button onclick="pasteFromClipboard()" title="لصق من الجهاز" class="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 text-xs border border-zinc-700/60 transition flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <span>لصق الجهاز</span>
                 </button>
             </div>
 
-            <p class="text-xs text-zinc-400 mb-4">قم بتسجيل الدخول لتتمكن من الوصول إلى حافظتك من أي مكان بآمان.</p>
+            <!-- 2. File Input Area -->
+            <div id="fileInputArea" class="hidden space-y-3">
+                <div onclick="document.getElementById('fileElement').click()" class="border-2 border-dashed border-zinc-800 hover:border-zinc-600 rounded-xl p-6 text-center cursor-pointer transition bg-zinc-950/50">
+                    <input type="file" id="fileElement" class="hidden" onchange="handleFileSelect(event)" accept="image/*,.pdf,.doc,.docx,.txt,.zip">
+                    <svg class="w-8 h-8 mx-auto text-zinc-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <p class="text-xs font-semibold text-zinc-300">اضغط هنا لاختيار صورة، مستند PDF، أو ملف</p>
+                    <p class="text-[11px] text-zinc-500 mt-1">يدعم الصور، PDF، المستندات والملفات المضغوطة</p>
+                </div>
+                <div id="filePreview" class="hidden flex items-center justify-between p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300">
+                    <div class="flex items-center gap-2 truncate">
+                        <svg class="w-5 h-5 text-zinc-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <span id="fileName" class="truncate font-medium"></span>
+                        <span id="fileSize" class="text-zinc-500 text-[11px]"></span>
+                    </div>
+                    <button onclick="clearSelectedFile()" class="text-red-400 hover:text-red-300 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
 
-            <button id="googleSignInBtn" class="w-full py-2.5 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 mb-3">
-                <i class="fa-brands fa-google text-red-500"></i>
-                <span>متابعة باستخدام Google</span>
+            <!-- 3. Audio Recorder Area -->
+            <div id="audioInputArea" class="hidden text-center py-6 space-y-3 bg-zinc-950/40 rounded-xl border border-zinc-900">
+                <div class="flex items-center justify-center gap-3">
+                    <button id="recordBtn" onclick="toggleAudioRecord()" class="w-14 h-14 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                        </svg>
+                    </button>
+                </div>
+                <p id="recordTimer" class="text-xs font-mono text-zinc-400">00:00</p>
+                <div id="audioPlaybackContainer" class="hidden max-w-sm mx-auto pt-2">
+                    <audio id="audioPlayback" controls class="w-full h-8"></audio>
+                </div>
+            </div>
+
+            <!-- Additional Controls (Tags, Expiration, PIN) -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-zinc-800/60">
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                    <!-- Tag Input -->
+                    <input type="text" id="tagInput" placeholder="#وسم (مثال: عمل)" class="glass-input rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-500 w-28">
+
+                    <!-- Expiration Dropdown -->
+                    <select id="expirySelect" class="glass-input rounded-xl px-2.5 py-1.5 text-xs text-white bg-zinc-900 border border-zinc-800">
+                        <option value="0">تلقائي: بلا حذف</option>
+                        <option value="10">حذف بعد 10 دقائق</option>
+                        <option value="60">حذف بعد ساعة</option>
+                        <option value="1440">حذف بعد يوم</option>
+                        <option value="10080">حذف بعد أسبوع</option>
+                    </select>
+
+                    <!-- PIN Lock Toggle -->
+                    <label class="flex items-center gap-1.5 cursor-pointer glass-input rounded-xl px-3 py-1.5 select-none hover:bg-zinc-800 transition">
+                        <input type="checkbox" id="pinCheck" onchange="togglePinInput()" class="rounded bg-zinc-900 border-zinc-700 text-white focus:ring-0">
+                        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        <span>قفل برقم سري</span>
+                    </label>
+
+                    <input type="password" id="pinCode" maxlength="6" placeholder="****" class="hidden glass-input rounded-xl px-2.5 py-1 text-xs text-white w-16 text-center tracking-widest font-mono">
+                </div>
+
+                <!-- Submit Button -->
+                <button onclick="saveItem()" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 transition flex items-center justify-center gap-1.5 shadow-lg active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    <span>إضافة للحافظة</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="space-y-3">
+            <div class="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-1">
+                <div class="flex items-center gap-1.5">
+                    <button onclick="filterItems('all')" id="filter-all" class="filter-btn px-3 py-1 rounded-xl text-xs font-semibold bg-white text-black transition whitespace-nowrap">الكل</button>
+                    <button onclick="filterItems('pinned')" id="filter-pinned" class="filter-btn px-3 py-1 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white transition whitespace-nowrap">المثبتة</button>
+                    <button onclick="filterItems('text')" id="filter-text" class="filter-btn px-3 py-1 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white transition whitespace-nowrap">نصوص وروابط</button>
+                    <button onclick="filterItems('code')" id="filter-code" class="filter-btn px-3 py-1 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white transition whitespace-nowrap">أكواد</button>
+                    <button onclick="filterItems('file')" id="filter-file" class="filter-btn px-3 py-1 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white transition whitespace-nowrap">ملفات وصور</button>
+                    <button onclick="filterItems('audio')" id="filter-audio" class="filter-btn px-3 py-1 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white transition whitespace-nowrap">صوتيات</button>
+                </div>
+            </div>
+
+            <div class="relative">
+                <input type="text" id="searchInput" oninput="renderItems()" placeholder="ابحث في حافظتك (بالنص، الكود، الرابط، أو الوسم)..."
+                    class="w-full glass-input rounded-xl pr-10 pl-4 py-2 text-xs text-white placeholder-zinc-500 focus:ring-1 focus:ring-zinc-600">
+                <svg class="w-4 h-4 absolute right-3.5 top-2.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Items Display Grid -->
+        <div id="clipboardList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Dynamic Content Cards Inserted Here -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-900 py-4 text-center text-xs text-zinc-600">
+        <p>الحافظة السحابية الذكية &copy; 2026 - مشفرة ومزمنة فورياً</p>
+    </footer>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-sm space-y-5 border border-zinc-800 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 left-4 text-zinc-400 hover:text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
             </button>
 
-            <div class="relative flex py-2 items-center">
+            <div class="text-center space-y-1">
+                <h3 class="text-lg font-bold text-white">تسجيل الدخول</h3>
+                <p class="text-xs text-zinc-400">احفظ حافظتك ومزامنتها عبر جميع أجهزتك</p>
+            </div>
+
+            <button onclick="signInWithGoogle()" class="w-full py-2.5 px-4 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition flex items-center justify-center gap-2 shadow">
+                <svg class="w-4 h-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>المتابعة باستخدام Google</span>
+            </button>
+
+            <div class="relative flex py-1 items-center">
                 <div class="flex-grow border-t border-zinc-800"></div>
-                <span class="flex-shrink mx-2 text-[10px] text-zinc-500">أو بريد إلكتروني</span>
+                <span class="flex-shrink mx-2 text-[10px] text-zinc-500 uppercase">أو بالبريد الإلكتروني</span>
                 <div class="flex-grow border-t border-zinc-800"></div>
             </div>
 
-            <form id="emailLoginForm" class="space-y-3 mt-2">
-                <input id="loginEmail" type="email" required placeholder="البريد الإلكتروني" class="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-100 outline-none focus:border-zinc-600">
-                <input id="loginPassword" type="password" required placeholder="كلمة المرور" class="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-100 outline-none focus:border-zinc-600">
-                <button type="submit" class="w-full py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all">
+            <form onsubmit="handleEmailAuth(event)" class="space-y-3">
+                <input type="email" id="authEmail" required placeholder="البريد الإلكتروني" class="w-full glass-input rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-500">
+                <input type="password" id="authPassword" required placeholder="كلمة المرور" class="w-full glass-input rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-500">
+                <button type="submit" class="w-full py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs border border-zinc-700 transition">
                     تسجيل الدخول / إنشاء حساب
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Share / QR Modal -->
-    <div id="shareModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-        <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 max-w-sm w-full shadow-2xl">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-qrcode text-zinc-400"></i> رمز QR للمشاركة
-                </h3>
-                <button id="closeShareModalBtn" class="text-zinc-500 hover:text-white text-base">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="flex flex-col items-center p-3 bg-black rounded-xl border border-zinc-800">
-                <img id="qrImage" src="" alt="QR" class="w-40 h-40 rounded-lg p-2 bg-white">
-                <p id="qrTextPreview" class="text-[11px] text-zinc-400 mt-2 line-clamp-2 break-all text-center"></p>
-            </div>
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-xs space-y-4 text-center relative border border-zinc-800">
+            <button onclick="closeQRModal()" class="absolute top-4 left-4 text-zinc-400 hover:text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <h3 class="text-sm font-bold text-white">امسح الرمز لفتح الحافظة</h3>
+            <div id="qrcode" class="p-3 bg-white rounded-xl inline-block shadow-inner"></div>
+            <p class="text-[11px] text-zinc-400">افتح الكاميرا في هاتفك لمزامنة الحافظة مباشرة</p>
         </div>
     </div>
 
-    <!-- PIN Unlock Modal -->
-    <div id="pinUnlockModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-        <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 max-w-xs w-full text-center">
-            <i class="fa-solid fa-lock text-2xl text-zinc-400 mb-2"></i>
-            <h3 class="text-sm font-bold text-white mb-1">فك قفل المحتوى</h3>
-            <p class="text-xs text-zinc-500 mb-3">أدخل رمز PIN المكون من 4 أرقام</p>
-            <input id="unlockPinInput" type="password" maxlength="4" class="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-center text-lg tracking-widest text-white outline-none mb-3">
-            <div class="flex gap-2">
-                <button id="cancelUnlockBtn" class="flex-1 py-2 rounded-xl bg-zinc-900 text-zinc-400 text-xs font-bold">إلغاء</button>
-                <button id="confirmUnlockBtn" class="flex-1 py-2 rounded-xl bg-white text-black text-xs font-bold">فك القفل</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div id="toastContainer" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
+    <!-- Application Script -->
     <script>
-        // Firebase Configuration fallback object
+        // --- Firebase Configuration ---
         const firebaseConfig = {
-            apiKey: "AIzaSyDummyKeyForFallbackPurpose12345",
-            authDomain: "ayman-44297.firebaseapp.com",
-            projectId: "ayman-44297",
-            storageBucket: "ayman-44297.appspot.com",
-            messagingSenderId: "1234567890",
-            appId: "1:1234567890:web:abcdef123456"
+          apiKey: "AIzaSyASkHiam15tKJALtFGXPvs5K3Na_XrwSJ0",
+          authDomain: "ayman-44297.firebaseapp.com",
+          projectId: "ayman-44297",
+          storageBucket: "ayman-44297.firebasestorage.app",
+          messagingSenderId: "492366579506",
+          appId: "1:492366579506:web:37926592c92209d798f92b",
+          measurementId: "G-X2BX9LR8NC"
         };
 
-        // Initialize Firebase safely
-        let auth, db;
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            auth = firebase.auth();
-            db = firebase.firestore();
-        } catch (e) {
-            console.log("Firebase fallback mode active");
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
 
-        // Global State
-        let clips = JSON.parse(localStorage.getItem('smart_cloud_clips_v2')) || [
-            {
-                id: '1',
-                content: 'https://github.com/cloud-clipboard',
-                type: 'text',
-                tag: 'رابط',
-                pinned: true,
-                pin: '',
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: '2',
-                content: 'function helloWorld() {\n  console.log("مرحباً بك!");\n}',
-                type: 'code',
-                language: 'javascript',
-                tag: 'برمجة',
-                pinned: false,
-                pin: '',
-                createdAt: new Date().toISOString()
-            }
-        ];
-
-        let selectedType = 'text';
+        // State Variables
+        let currentUser = null;
+        let currentTab = 'text'; // 'text', 'code', 'file', 'audio'
         let currentFilter = 'all';
-        let searchQuery = '';
-        let targetClipForUnlock = null;
+        let items = [];
+        let selectedFileData = null; // { url, name, type, size }
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let recordInterval = null;
+        let recordSeconds = 0;
+        let recordedAudioBlob = null;
 
-        // UI Elements
-        const clipInput = document.getElementById('clipInput');
-        const tagInput = document.getElementById('tagInput');
-        const pinLockToggle = document.getElementById('pinLockToggle');
-        const pinInput = document.getElementById('pinInput');
-        const addClipBtn = document.getElementById('addClipBtn');
-        const quickPasteBtn = document.getElementById('quickPasteBtn');
-        const searchInput = document.getElementById('searchInput');
-        const clipsGrid = document.getElementById('clipsGrid');
-        const emptyState = document.getElementById('emptyState');
-        const langSelectContainer = document.getElementById('langSelectContainer');
-        const codeLanguageSelect = document.getElementById('codeLanguageSelect');
-        const userAuthSection = document.getElementById('userAuthSection');
-        const authModal = document.getElementById('authModal');
-        const openAuthModalBtn = document.getElementById('openAuthModalBtn');
-        const closeAuthModalBtn = document.getElementById('closeAuthModalBtn');
-        const googleSignInBtn = document.getElementById('googleSignInBtn');
-        const emailLoginForm = document.getElementById('emailLoginForm');
-
-        // Pin Toggle behavior
-        pinLockToggle.addEventListener('change', () => {
-            if (pinLockToggle.checked) {
-                pinInput.classList.remove('hidden');
-                pinInput.focus();
-            } else {
-                pinInput.classList.add('hidden');
-                pinInput.value = '';
-            }
+        // --- App Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initAuth();
+            setupPasteListener();
+            loadLocalBackup();
+            generateWebsiteQR();
         });
 
-        // Type selection tabs (Explicit type choices)
-        document.querySelectorAll('.type-tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.type-tab-btn').forEach(b => {
-                    b.classList.remove('active-tab', 'bg-zinc-800', 'text-white');
-                    b.classList.add('text-zinc-400');
-                });
-                btn.classList.add('active-tab', 'bg-zinc-800', 'text-white');
-                btn.classList.remove('text-zinc-400');
+        // --- Auth Setup ---
+        function initAuth() {
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                const statusDot = document.getElementById('connectionStatusDot');
+                const statusText = document.getElementById('connectionStatusText');
+                const loginBtn = document.getElementById('loginBtn');
+                const userInfo = document.getElementById('userInfo');
+                const userEmail = document.getElementById('userEmail');
 
-                selectedType = btn.dataset.type;
-                
-                if (selectedType === 'code') {
-                    langSelectContainer.classList.remove('hidden');
+                if (user) {
+                    statusDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                    statusText.textContent = "سحابي (مستخدم مسجل)";
+                    loginBtn.classList.add('hidden');
+                    userInfo.classList.remove('hidden');
+                    userEmail.textContent = user.email || 'مستخدم Google';
+                    subscribeFirestore();
                 } else {
-                    langSelectContainer.classList.add('hidden');
+                    statusDot.className = "w-2 h-2 rounded-full bg-amber-500";
+                    statusText.textContent = "سحابي عام / محلي";
+                    loginBtn.classList.remove('hidden');
+                    userInfo.classList.add('hidden');
+                    subscribeFirestore();
                 }
             });
-        });
+        }
 
-        // Add new Clip
-        addClipBtn.addEventListener('click', () => {
-            const content = clipInput.value.trim();
-            if (!content) {
-                showToast('يرجى إدخال محتوى أولاً', 'warning');
+        function openAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        async function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await auth.signInWithPopup(provider);
+                closeAuthModal();
+            } catch (error) {
+                console.warn("Popup error, trying redirect...", error);
+                try {
+                    await auth.signInWithRedirect(provider);
+                } catch (err) {
+                    alert("تعذر تسجيل الدخول بـ Google: " + err.message);
+                }
+            }
+        }
+
+        async function handleEmailAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                closeAuthModal();
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    try {
+                        await auth.createUserWithEmailAndPassword(email, password);
+                        closeAuthModal();
+                    } catch (err) {
+                        alert("خطأ أثناء إنشاء الحساب: " + err.message);
+                    }
+                } else {
+                    alert("خطأ في تسجيل الدخول: " + error.message);
+                }
+            }
+        }
+
+        function logout() {
+            auth.signOut();
+        }
+
+        // --- Firestore Sync ---
+        function subscribeFirestore() {
+            const collectionRef = db.collection('clipboard');
+            collectionRef.orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+                items = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    items.push({ id: doc.id, ...data });
+                });
+                saveLocalBackup();
+                renderItems();
+            }, error => {
+                console.warn("Firestore access warning:", error);
+                renderItems();
+            });
+        }
+
+        function saveLocalBackup() {
+            localStorage.setItem('cloud_clipboard_backup', JSON.stringify(items));
+        }
+
+        function loadLocalBackup() {
+            const backup = localStorage.getItem('cloud_clipboard_backup');
+            if (backup) {
+                try { items = JSON.parse(backup); renderItems(); } catch(e){}
+            }
+        }
+
+        // --- Tabs Navigation ---
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800";
+            });
+
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            if (activeBtn) {
+                activeBtn.className = "tab-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 whitespace-nowrap bg-zinc-800 text-white border border-zinc-700";
+            }
+
+            document.getElementById('textInputArea').classList.add('hidden');
+            document.getElementById('fileInputArea').classList.add('hidden');
+            document.getElementById('audioInputArea').classList.add('hidden');
+            document.getElementById('languageSelectorContainer').classList.add('hidden');
+
+            if (tab === 'text') {
+                document.getElementById('textInputArea').classList.remove('hidden');
+            } else if (tab === 'code') {
+                document.getElementById('textInputArea').classList.remove('hidden');
+                document.getElementById('languageSelectorContainer').classList.remove('hidden');
+            } else if (tab === 'file') {
+                document.getElementById('fileInputArea').classList.remove('hidden');
+            } else if (tab === 'audio') {
+                document.getElementById('audioInputArea').classList.remove('hidden');
+            }
+        }
+
+        // --- File Select Handling ---
+        async function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 15 * 1024 * 1024) {
+                alert("حجم الملف كبير جداً (الأقصى 15 ميجابايت)");
                 return;
             }
 
-            let pinCode = '';
-            if (pinLockToggle.checked) {
-                pinCode = pinInput.value.trim();
-                if (pinCode.length < 4) {
-                    showToast('يرجى كتابة رمز PIN مكون من 4 أرقام', 'warning');
-                    return;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = `(${formatBytes(file.size)})`;
+            document.getElementById('filePreview').classList.remove('hidden');
+
+            try {
+                const storageRef = storage.ref(`uploads/${Date.now()}_${file.name}`);
+                const snapshot = await storageRef.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                selectedFileData = {
+                    url: downloadURL,
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                };
+            } catch (err) {
+                console.warn("Storage upload fallback to base64:", err);
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    selectedFileData = {
+                        url: event.target.result,
+                        name: file.name,
+                        type: file.type,
+                        size: file.size
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearSelectedFile() {
+            selectedFileData = null;
+            document.getElementById('fileElement').value = '';
+            document.getElementById('filePreview').classList.add('hidden');
+        }
+
+        // --- Audio Recording Handling ---
+        async function toggleAudioRecord() {
+            const btn = document.getElementById('recordBtn');
+            const timer = document.getElementById('recordTimer');
+
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                    mediaRecorder.onstop = async () => {
+                        recordedAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const audioUrl = URL.createObjectURL(recordedAudioBlob);
+                        document.getElementById('audioPlayback').src = audioUrl;
+                        document.getElementById('audioPlaybackContainer').classList.remove('hidden');
+
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            selectedFileData = {
+                                url: reader.result,
+                                name: `تسجيل_صوتي_${new Date().toLocaleTimeString('ar-EG')}.webm`,
+                                type: 'audio/webm',
+                                size: recordedAudioBlob.size
+                            };
+                        };
+                        reader.readAsDataURL(recordedAudioBlob);
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    btn.classList.add('bg-red-700');
+                    recordSeconds = 0;
+                    recordInterval = setInterval(() => {
+                        recordSeconds++;
+                        const mins = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+                        const secs = String(recordSeconds % 60).padStart(2, '0');
+                        timer.textContent = `${mins}:${secs}`;
+                    }, 1000);
+                } catch (e) {
+                    alert("تعذر الوصول للميكروفون: " + e.message);
                 }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                clearInterval(recordInterval);
+                btn.classList.remove('bg-red-700');
+            }
+        }
+
+        // --- Item Save Logic ---
+        async function saveItem() {
+            const mainInput = document.getElementById('mainInput').value.trim();
+            const tag = document.getElementById('tagInput').value.trim();
+            const expiryMinutes = parseInt(document.getElementById('expirySelect').value);
+            const isPinLocked = document.getElementById('pinCheck').checked;
+            const pinCode = document.getElementById('pinCode').value.trim();
+
+            if (isPinLocked && (!pinCode || pinCode.length < 4)) {
+                alert("يرجى إدخال رقم سري مكون من 4 أرقام على الأقل");
+                return;
             }
 
-            const newClip = {
-                id: Date.now().toString(),
-                content: content,
-                type: selectedType,
-                language: selectedType === 'code' ? codeLanguageSelect.value : '',
-                tag: tagInput.value.trim() || 'عام',
+            let newItem = {
+                type: currentTab,
+                content: mainInput,
+                tag: tag ? (tag.startsWith('#') ? tag : '#' + tag) : '',
                 pinned: false,
-                pin: pinCode,
-                createdAt: new Date().toISOString()
+                pinLocked: isPinLocked,
+                pinCode: isPinLocked ? pinCode : null,
+                createdAt: new Date().toISOString(),
+                expiresAt: expiryMinutes > 0 ? new Date(Date.now() + expiryMinutes * 60000).toISOString() : null,
+                userUid: currentUser ? currentUser.uid : 'guest'
             };
 
-            clips.unshift(newClip);
-            saveToStorage();
-            renderClips();
-
-            // Reset Input
-            clipInput.value = '';
-            tagInput.value = '';
-            pinInput.value = '';
-            pinLockToggle.checked = false;
-            pinInput.classList.add('hidden');
-
-            showToast('تمت إضافة العنصر للحافظة بنجاح', 'success');
-        });
-
-        // Quick Paste
-        quickPasteBtn.addEventListener('click', async () => {
-            try {
-                if (navigator.clipboard && navigator.clipboard.readText) {
-                    const text = await navigator.clipboard.readText();
-                    clipInput.value = text;
-                    showToast('تم اللصق من الحافظة', 'info');
+            if (currentTab === 'code') {
+                newItem.language = document.getElementById('codeLanguage').value;
+            } else if (currentTab === 'file' || currentTab === 'audio') {
+                if (!selectedFileData) {
+                    alert("يرجى اختيار ملف أو تسجيل صوت أولاً");
+                    return;
                 }
-            } catch (err) {
-                showToast('الرجاء السماح بالوصول للحافظة', 'warning');
+                newItem.file = selectedFileData;
+                if (!newItem.content) {
+                    newItem.content = selectedFileData.name;
+                }
             }
-        });
 
-        // Fallback Clipboard Copy
-        function copyText(text) {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed';
-            ta.style.opacity = '0';
-            document.body.appendChild(ta);
-            ta.select();
-            let success = false;
-            try {
-                success = document.execCommand('copy');
-            } catch (e) {
-                success = false;
-            }
-            document.body.removeChild(ta);
-            return success;
-        }
-
-        window.handleCopy = function(id) {
-            const clip = clips.find(c => c.id === id);
-            if (!clip) return;
-
-            if (clip.pin) {
-                promptPinUnlock(clip, (unlockedClip) => {
-                    copyText(unlockedClip.content);
-                    showToast('تم نسخ المحتوى المشفّر بنجاح', 'success');
-                });
+            if (currentTab === 'text' && !newItem.content) {
+                alert("الرجاء كتابة نص أو لصق رابط أولاً");
                 return;
             }
 
-            copyText(clip.content);
-            showToast('تم نسخ المحتوى للحافظة', 'success');
-        };
-
-        window.togglePin = function(id) {
-            const clip = clips.find(c => c.id === id);
-            if (clip) {
-                clip.pinned = !clip.pinned;
-                saveToStorage();
-                renderClips();
+            try {
+                await db.collection('clipboard').add(newItem);
+            } catch (err) {
+                console.warn("Saving locally fallback:", err);
+                newItem.id = 'local_' + Date.now();
+                items.unshift(newItem);
+                saveLocalBackup();
+                renderItems();
             }
-        };
 
-        window.deleteClip = function(id) {
-            clips = clips.filter(c => c.id !== id);
-            saveToStorage();
-            renderClips();
-            showToast('تم حذف العنصر', 'info');
-        };
-
-        // PIN Unlock Handler
-        function promptPinUnlock(clip, callback) {
-            targetClipForUnlock = { clip, callback };
-            document.getElementById('unlockPinInput').value = '';
-            document.getElementById('pinUnlockModal').classList.remove('hidden');
-            document.getElementById('pinUnlockModal').classList.add('flex');
-            document.getElementById('unlockPinInput').focus();
+            document.getElementById('mainInput').value = '';
+            document.getElementById('tagInput').value = '';
+            document.getElementById('pinCheck').checked = false;
+            document.getElementById('pinCode').classList.add('hidden');
+            document.getElementById('pinCode').value = '';
+            clearSelectedFile();
+            if (isRecording) toggleAudioRecord();
+            document.getElementById('audioPlaybackContainer').classList.add('hidden');
         }
 
-        document.getElementById('cancelUnlockBtn').addEventListener('click', () => {
-            document.getElementById('pinUnlockModal').classList.add('hidden');
-            document.getElementById('pinUnlockModal').classList.remove('flex');
-        });
+        // --- Render Items ---
+        function renderItems() {
+            const container = document.getElementById('clipboardList');
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            container.innerHTML = '';
 
-        document.getElementById('confirmUnlockBtn').addEventListener('click', () => {
-            const entered = document.getElementById('unlockPinInput').value;
-            if (targetClipForUnlock && entered === targetClipForUnlock.clip.pin) {
-                document.getElementById('pinUnlockModal').classList.add('hidden');
-                document.getElementById('pinUnlockModal').classList.remove('flex');
-                targetClipForUnlock.callback(targetClipForUnlock.clip);
-            } else {
-                showToast('رمز PIN غير صحيح', 'error');
-            }
-        });
+            let filtered = items.filter(item => {
+                if (item.expiresAt && new Date(item.expiresAt) < new Date()) {
+                    return false;
+                }
 
-        // Share QR Modal
-        window.openShare = function(id) {
-            const clip = clips.find(c => c.id === id);
-            if (!clip) return;
-
-            const modal = document.getElementById('shareModal');
-            const qrImg = document.getElementById('qrImage');
-            const preview = document.getElementById('qrTextPreview');
-
-            const content = clip.pin ? 'محتوى محمي برقم سري' : clip.content;
-            preview.textContent = content;
-            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(content.substring(0, 200))}`;
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        };
-
-        document.getElementById('closeShareModalBtn').addEventListener('click', () => {
-            document.getElementById('shareModal').classList.add('hidden');
-            document.getElementById('shareModal').classList.remove('flex');
-        });
-
-        // Auth Modal Handlers
-        openAuthModalBtn.addEventListener('click', () => {
-            authModal.classList.remove('hidden');
-            authModal.classList.add('flex');
-        });
-
-        closeAuthModalBtn.addEventListener('click', () => {
-            authModal.classList.add('hidden');
-            authModal.classList.remove('flex');
-        });
-
-        googleSignInBtn.addEventListener('click', () => {
-            if (auth) {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                auth.signInWithPopup(provider).then(() => {
-                    authModal.classList.add('hidden');
-                    showToast('تم تسجيل الدخول بنجاح', 'success');
-                }).catch(err => {
-                    showToast('تعذر تسجيل الدخول: ' + err.message, 'error');
-                });
-            } else {
-                showToast('تم تفعيل وضع الدخول التجريبي', 'info');
-                updateUserUI({ displayName: 'مستخدم تجريبي', email: 'user@example.com' });
-                authModal.classList.add('hidden');
-            }
-        });
-
-        emailLoginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            showToast('تم تسجيل الدخول: ' + email, 'success');
-            updateUserUI({ displayName: email.split('@')[0], email: email });
-            authModal.classList.add('hidden');
-        });
-
-        function updateUserUI(user) {
-            if (user) {
-                userAuthSection.innerHTML = `
-                    <div class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl text-xs">
-                        <i class="fa-solid fa-circle-user text-zinc-400"></i>
-                        <span class="text-zinc-200 font-bold">${user.displayName || user.email}</span>
-                        <button onclick="logoutUser()" title="تسجيل الخروج" class="text-zinc-500 hover:text-red-400 mr-1">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </button>
-                    </div>
-                `;
-            } else {
-                userAuthSection.innerHTML = `
-                    <button id="openAuthModalBtn" onclick="document.getElementById('authModal').classList.remove('hidden'); document.getElementById('authModal').classList.add('flex');" class="px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all flex items-center gap-2 shadow-lg">
-                        <i class="fa-solid fa-right-to-bracket"></i>
-                        <span>تسجيل الدخول</span>
-                    </button>
-                `;
-            }
-        }
-
-        window.logoutUser = function() {
-            if (auth) auth.signOut();
-            updateUserUI(null);
-            showToast('تم تسجيل الخروج', 'info');
-        };
-
-        // Filter & Search listeners
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter-btn').forEach(b => {
-                    b.classList.remove('active-filter', 'bg-white', 'text-black');
-                    b.classList.add('bg-zinc-950', 'text-zinc-400');
-                });
-                btn.classList.add('active-filter', 'bg-white', 'text-black');
-                btn.classList.remove('bg-zinc-950', 'text-zinc-400');
-
-                currentFilter = btn.dataset.filter;
-                renderClips();
-            });
-        });
-
-        searchInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value.toLowerCase().trim();
-            renderClips();
-        });
-
-        function renderClips() {
-            clipsGrid.innerHTML = '';
-
-            let filtered = clips.filter(clip => {
-                if (currentFilter === 'pinned' && !clip.pinned) return false;
-                if (currentFilter === 'code' && clip.type !== 'code') return false;
-                if (currentFilter === 'text' && clip.type !== 'text' && clip.type !== 'note') return false;
+                if (currentFilter === 'pinned' && !item.pinned) return false;
+                if (currentFilter === 'text' && item.type !== 'text') return false;
+                if (currentFilter === 'code' && item.type !== 'code') return false;
+                if (currentFilter === 'file' && item.type !== 'file') return false;
+                if (currentFilter === 'audio' && item.type !== 'audio') return false;
 
                 if (searchQuery) {
-                    return clip.content.toLowerCase().includes(searchQuery) || (clip.tag && clip.tag.toLowerCase().includes(searchQuery));
+                    const matchContent = (item.content || '').toLowerCase().includes(searchQuery);
+                    const matchTag = (item.tag || '').toLowerCase().includes(searchQuery);
+                    const matchFileName = (item.file && item.file.name || '').toLowerCase().includes(searchQuery);
+                    return matchContent || matchTag || matchFileName;
                 }
                 return true;
             });
 
-            filtered.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
-
             if (filtered.length === 0) {
-                emptyState.classList.remove('hidden');
-                emptyState.classList.add('flex');
-            } else {
-                emptyState.classList.add('hidden');
-                emptyState.classList.remove('flex');
-            }
-
-            filtered.forEach(clip => {
-                const card = document.createElement('div');
-                card.className = `p-4 rounded-xl bg-zinc-950 border ${clip.pinned ? 'border-amber-500/50' : 'border-zinc-800'} flex flex-col justify-between`;
-
-                let bodyHtml = '';
-                if (clip.pin) {
-                    bodyHtml = `
-                        <div class="py-4 text-center text-zinc-500 text-xs flex flex-col items-center gap-1">
-                            <i class="fa-solid fa-lock text-base text-zinc-400"></i>
-                            <span>محتوى مقفل برقم PIN</span>
-                        </div>
-                    `;
-                } else if (clip.type === 'code') {
-                    bodyHtml = `<pre class="bg-black text-zinc-200 p-3 rounded-lg text-xs font-mono overflow-x-auto text-left dir-ltr border border-zinc-900 max-h-36"><code>${escapeHtml(clip.content)}</code></pre>`;
-                } else {
-                    bodyHtml = `<p class="text-xs text-zinc-300 whitespace-pre-wrap break-words line-clamp-4 leading-relaxed">${escapeHtml(clip.content)}</p>`;
-                }
-
-                card.innerHTML = `
-                    <div>
-                        <div class="flex items-center justify-between gap-2 mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 text-[10px] border border-zinc-800">#${escapeHtml(clip.tag)}</span>
-                                ${clip.language ? `<span class="px-1.5 py-0.5 rounded bg-zinc-900 text-xs font-mono text-zinc-500">${clip.language}</span>` : ''}
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <button onclick="togglePin('${clip.id}')" title="تثبيت" class="p-1 rounded hover:bg-zinc-900 ${clip.pinned ? 'text-amber-400' : 'text-zinc-600'} text-xs">
-                                    <i class="fa-solid fa-thumbtack"></i>
-                                </button>
-                                <button onclick="openShare('${clip.id}')" title="مشاركة" class="p-1 rounded text-zinc-600 hover:text-white hover:bg-zinc-900 text-xs">
-                                    <i class="fa-solid fa-qrcode"></i>
-                                </button>
-                                <button onclick="deleteClip('${clip.id}')" title="حذف" class="p-1 rounded text-zinc-600 hover:text-red-400 hover:bg-zinc-900 text-xs">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="my-2">${bodyHtml}</div>
-                    </div>
-                    <div class="mt-3 pt-2 border-t border-zinc-900 flex items-center justify-between text-[10px] text-zinc-500">
-                        <span>${new Date(clip.createdAt).toLocaleDateString('ar-EG')}</span>
-                        <button onclick="handleCopy('${clip.id}')" class="px-3 py-1 rounded-lg bg-zinc-900 hover:bg-white hover:text-black text-zinc-300 font-bold transition-all text-xs flex items-center gap-1">
-                            <i class="fa-solid fa-copy"></i> نسخ
-                        </button>
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-zinc-600">
+                        <svg class="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                        </svg>
+                        <p class="text-xs">لا توجد عناصر في الحافظة حالياً</p>
                     </div>
                 `;
+                return;
+            }
 
-                clipsGrid.appendChild(card);
+            filtered.forEach(item => {
+                const card = createCardElement(item);
+                container.appendChild(card);
             });
 
-            // Highlight syntax
             document.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block);
             });
         }
 
-        function showToast(msg, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `pointer-events-auto px-3.5 py-2 rounded-xl text-xs font-bold text-white shadow-lg bg-zinc-900 border border-zinc-800 animate-in slide-in-from-bottom-2 duration-200`;
-            toast.innerHTML = msg;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 2500);
+        function createCardElement(item) {
+            const card = document.createElement('div');
+            card.className = `glass-card rounded-2xl p-4 space-y-3 relative flex flex-col justify-between transition hover:border-zinc-700 ${item.pinned ? 'border-amber-500/40 bg-amber-950/10' : ''}`;
+
+            let typeBadge = '';
+            if (item.type === 'code') {
+                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] font-mono text-zinc-300">${item.language || 'Code'}</span>`;
+            } else if (item.type === 'file') {
+                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">ملف / صورة</span>`;
+            } else if (item.type === 'audio') {
+                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">صوت</span>`;
+            } else {
+                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">نص</span>`;
+            }
+
+            const isLocked = item.pinLocked && !item.unlocked;
+
+            let cardContentHtml = '';
+
+            if (isLocked) {
+                cardContentHtml = `
+                    <div class="text-center py-6 space-y-2">
+                        <svg class="w-8 h-8 mx-auto text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        <p class="text-xs text-zinc-400 font-semibold">هذا العنصر مقفول برقم سري</p>
+                        <button onclick="unlockCard('${item.id}', '${item.pinCode}')" class="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition">
+                            فك القفل 🔓
+                        </button>
+                    </div>
+                `;
+            } else {
+                if (item.type === 'code') {
+                    cardContentHtml = `
+                        <div class="relative group">
+                            <pre class="rounded-xl p-3 bg-zinc-950 text-xs overflow-x-auto font-mono text-zinc-200 border border-zinc-800/80"><code>${escapeHtml(item.content)}</code></pre>
+                        </div>
+                    `;
+                } else if (item.type === 'file' && item.file) {
+                    const isImg = item.file.type && item.file.type.startsWith('image/');
+                    if (isImg) {
+                        cardContentHtml = `
+                            <div class="space-y-2">
+                                <img src="${item.file.url}" class="max-h-48 rounded-xl w-full object-cover border border-zinc-800" alt="${item.file.name}">
+                                <p class="text-xs text-zinc-300 font-medium truncate">${escapeHtml(item.file.name)}</p>
+                            </div>
+                        `;
+                    } else {
+                        cardContentHtml = `
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+                                <div class="flex items-center gap-2.5 truncate">
+                                    <svg class="w-6 h-6 text-zinc-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <div class="truncate">
+                                        <p class="text-xs font-semibold text-zinc-200 truncate">${escapeHtml(item.file.name)}</p>
+                                        <p class="text-[10px] text-zinc-500">${formatBytes(item.file.size)}</p>
+                                    </div>
+                                </div>
+                                <a href="${item.file.url}" download="${item.file.name}" class="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-xs transition">
+                                    تحميل
+                                </a>
+                            </div>
+                        `;
+                    }
+                } else if (item.type === 'audio' && item.file) {
+                    cardContentHtml = `
+                        <div class="space-y-1.5">
+                            <p class="text-xs text-zinc-400">${escapeHtml(item.file.name)}</p>
+                            <audio controls src="${item.file.url}" class="w-full h-8"></audio>
+                        </div>
+                    `;
+                } else {
+                    const isUrl = isValidUrl(item.content);
+                    if (isUrl) {
+                        cardContentHtml = `
+                            <div class="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800/80">
+                                <a href="${item.content}" target="_blank" rel="noopener" class="text-xs text-blue-400 hover:underline break-all flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                    <span>${escapeHtml(item.content)}</span>
+                                </a>
+                            </div>
+                        `;
+                    } else {
+                        cardContentHtml = `<p class="text-xs text-zinc-200 whitespace-pre-wrap leading-relaxed break-words">${escapeHtml(item.content)}</p>`;
+                    }
+                }
+            }
+
+            card.innerHTML = `
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2">
+                            ${typeBadge}
+                            ${item.tag ? `<span class="text-[11px] text-zinc-500 font-medium">${escapeHtml(item.tag)}</span>` : ''}
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="togglePinItem('${item.id}')" title="تثبيت" class="p-1.5 rounded-lg text-zinc-400 hover:text-amber-400 transition">
+                                <svg class="w-4 h-4 ${item.pinned ? 'fill-amber-400 text-amber-400' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                                </svg>
+                            </button>
+                            <button onclick="deleteItem('${item.id}')" title="حذف" class="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    ${cardContentHtml}
+                </div>
+
+                ${!isLocked ? `
+                    <div class="flex items-center justify-between pt-2 border-t border-zinc-800/60 text-[11px] text-zinc-500">
+                        <span>${formatDate(item.createdAt)}</span>
+                        <div class="flex items-center gap-1">
+                            ${item.type === 'text' ? `
+                                <button onclick="speakText('${escapeJsString(item.content)}')" title="قراءة صوتية" class="p-1 rounded hover:text-white transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                                    </svg>
+                                </button>
+                            ` : ''}
+                            <button onclick="copyContent('${escapeJsString(item.content || (item.file && item.file.url))}')" title="نسخ" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition font-semibold text-[10px] flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                                <span>نسخ</span>
+                            </button>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            return card;
         }
 
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        function unlockCard(id, correctPin) {
+            const userPin = prompt("أدخل الرقم السري لفك قفل هذا العنصر:");
+            if (userPin === correctPin) {
+                const item = items.find(i => i.id === id);
+                if (item) {
+                    item.unlocked = true;
+                    renderItems();
+                }
+            } else if (userPin !== null) {
+                alert("الرقم السري غير صحيح!");
+            }
         }
 
-        function saveToStorage() {
-            localStorage.setItem('smart_cloud_clips_v2', JSON.stringify(clips));
+        async function copyContent(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                alert("تم النسخ إلى الحافظة بنجاح!");
+            } catch (e) {
+                alert("تعذر النسخ التلقائي");
+            }
         }
 
-        // Firebase Auth State Listener
-        if (auth) {
-            auth.onAuthStateChanged(user => {
-                updateUserUI(user);
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ar-SA';
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("خاصية القراءة الصوتية غير مدعومة في متصفحك");
+            }
+        }
+
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    document.getElementById('mainInput').value = text;
+                }
+            } catch (e) {
+                alert("يرجى منح إذن الوصول للحافظة أو استخدم Ctrl+V");
+            }
+        }
+
+        function setupPasteListener() {
+            document.addEventListener('paste', (e) => {
+                if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                if (pastedText) {
+                    switchTab('text');
+                    document.getElementById('mainInput').value = pastedText;
+                }
             });
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            renderClips();
-        });
+        async function togglePinItem(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+            const newPinned = !item.pinned;
+
+            try {
+                await db.collection('clipboard').doc(id).update({ pinned: newPinned });
+            } catch (e) {
+                item.pinned = newPinned;
+                saveLocalBackup();
+                renderItems();
+            }
+        }
+
+        async function deleteItem(id) {
+            if (!confirm("هل أنت تأكد من حذف هذا العنصر؟")) return;
+
+            try {
+                await db.collection('clipboard').doc(id).delete();
+            } catch (e) {
+                items = items.filter(i => i.id !== id);
+                saveLocalBackup();
+                renderItems();
+            }
+        }
+
+        function filterItems(type) {
+            currentFilter = type;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "filter-btn px-3 py-1 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white transition whitespace-nowrap";
+            });
+            const active = document.getElementById(`filter-${type}`);
+            if (active) {
+                active.className = "filter-btn px-3 py-1 rounded-xl text-xs font-semibold bg-white text-black transition whitespace-nowrap";
+            }
+            renderItems();
+        }
+
+        function togglePinInput() {
+            const check = document.getElementById('pinCheck').checked;
+            const input = document.getElementById('pinCode');
+            if (check) {
+                input.classList.remove('hidden');
+                input.focus();
+            } else {
+                input.classList.add('hidden');
+            }
+        }
+
+        function openQRModal() {
+            document.getElementById('qrModal').classList.remove('hidden');
+        }
+
+        function closeQRModal() {
+            document.getElementById('qrModal').classList.add('hidden');
+        }
+
+        function generateWebsiteQR() {
+            const qrContainer = document.getElementById('qrcode');
+            if (qrContainer) {
+                qrContainer.innerHTML = '';
+                new QRCode(qrContainer, {
+                    text: window.location.href,
+                    width: 160,
+                    height: 160,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff"
+                });
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+
+        function escapeJsString(str) {
+            if (!str) return '';
+            return str.replace(/\\/g, '\\\\').replace(/'/g, "\'").replace(/\n/g, '\n');
+        }
+
+        function isValidUrl(str) {
+            try {
+                const url = new URL(str);
+                return url.protocol === "http:" || url.protocol === "https:";
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function formatDate(isoString) {
+            if (!isoString) return '';
+            const d = new Date(isoString);
+            return d.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
     </script>
 </body>
 </html>
-```
+
