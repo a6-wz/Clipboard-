@@ -282,11 +282,12 @@
                 </div>
 
                 <!-- Submit Button -->
-                <button onclick="saveItem()" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 transition flex items-center justify-center gap-1.5 shadow-lg active:scale-95">
+                <button id="submitBtn" onclick="saveItem()" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 transition flex items-center justify-center gap-1.5 shadow-lg active:scale-95">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
-                    <span>إضافة للحافظة</span>
+
+                    <span id="submitBtnText">إضافة للحافظة</span>
                 </button>
             </div>
         </div>
@@ -583,6 +584,16 @@
             }
         }
 
+        // Helper: Convert File to Base64 Promise
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
         // --- File Select Handling ---
         async function handleFileSelect(e) {
             const file = e.target.files[0];
@@ -593,32 +604,36 @@
                 return;
             }
 
-            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileName').textContent = file.name + ' (جاري التجهيز...)';
             document.getElementById('fileSize').textContent = `(${formatBytes(file.size)})`;
             document.getElementById('filePreview').classList.remove('hidden');
 
             try {
-                const storageRef = storage.ref(`uploads/${Date.now()}_${file.name}`);
-                const snapshot = await storageRef.put(file);
-                const downloadURL = await snapshot.ref.getDownloadURL();
+                // Instantly generate base64 string so selectedFileData is ALWAYS valid immediately!
+                const base64Data = await readFileAsBase64(file);
                 selectedFileData = {
-                    url: downloadURL,
+                    url: base64Data,
                     name: file.name,
                     type: file.type,
                     size: file.size
                 };
+                document.getElementById('fileName').textContent = file.name;
             } catch (err) {
-                console.warn("Storage upload fallback to base64:", err);
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    selectedFileData = {
-                        url: event.target.result,
-                        name: file.name,
-                        type: file.type,
-                        size: file.size
-                    };
-                };
-                reader.readAsDataURL(file);
+                alert("تعذر قراءة الملف المحدد!");
+                clearSelectedFile();
+                return;
+            }
+
+            // Optional background upload to Firebase Storage if available
+            try {
+                const storageRef = storage.ref(`uploads/${Date.now()}_${file.name}`);
+                const snapshot = await storageRef.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                if (selectedFileData) {
+                    selectedFileData.url = downloadURL;
+                }
+            } catch (err) {
+                console.warn("Storage upload fallback to Base64 active:", err);
             }
         }
 
@@ -646,16 +661,17 @@
                         document.getElementById('audioPlayback').src = audioUrl;
                         document.getElementById('audioPlaybackContainer').classList.remove('hidden');
 
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
+                        try {
+                            const base64Audio = await readFileAsBase64(recordedAudioBlob);
                             selectedFileData = {
-                                url: reader.result,
+                                url: base64Audio,
                                 name: `تسجيل_صوتي_${new Date().toLocaleTimeString('ar-EG')}.webm`,
                                 type: 'audio/webm',
                                 size: recordedAudioBlob.size
                             };
-                        };
-                        reader.readAsDataURL(recordedAudioBlob);
+                        } catch(err) {
+                            console.error("Audio conversion failed:", err);
+                        }
                     };
 
                     mediaRecorder.start();
