@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>الحافظة السحابية الذكية - Cloud Clipboard</title>
+  <title>الحافظة السحابية الذكية</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,15 +14,9 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              500: '#0ea5e9',
-              600: '#0284c7',
-              700: '#0369a1',
-              800: '#075985',
-              900: '#0c4a6e',
-            }
+            oled: '#050811',
+            glass: 'rgba(15, 23, 42, 0.75)',
+            glow: '#0284c7'
           },
           fontFamily: {
             cairo: ['Cairo', 'sans-serif']
@@ -35,22 +29,16 @@
   <!-- Google Font: Cairo -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-  <!-- Prism.js Code Syntax Highlighting -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-
-  <!-- QRCode.js Library -->
+  <!-- QRCode Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-  <!-- Firebase Compatibility Libraries -->
+  <!-- Prism.js Syntax Highlighting -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+
+  <!-- Firebase Compat JS SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -58,298 +46,321 @@
   <style>
     body {
       font-family: 'Cairo', sans-serif;
+      background-color: #050811;
+      color: #f1f5f9;
+      overflow-x: hidden;
     }
-    /* Custom Scrollbars */
+
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
-    }
-    .dark ::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
+      background: #090d1a;
     }
     ::-webkit-scrollbar-thumb {
-      background: #0ea5e9;
-      border-radius: 4px;
+      background: #1e293b;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #0284c7;
+    }
+
+    .liquid-card {
+      background: rgba(13, 20, 36, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    .liquid-card:hover {
+      border-color: rgba(14, 165, 233, 0.4);
+      box-shadow: 0 10px 40px -10px rgba(14, 165, 233, 0.25);
+    }
+
+    .liquid-input {
+      background: rgba(8, 13, 26, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+      transition: all 0.2s ease;
+    }
+    .liquid-input:focus {
+      border-color: #0284c7;
+      box-shadow: 0 0 15px rgba(2, 132, 199, 0.3);
+      outline: none;
+    }
+
+    .glow-btn {
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4);
+      transition: all 0.2s ease;
+    }
+    .glow-btn:hover {
+      box-shadow: 0 6px 25px rgba(2, 132, 199, 0.6);
+      transform: translateY(-1px);
+    }
+    .glow-btn:active {
+      transform: translateY(1px);
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
 
-  <!-- Main Header -->
-  <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+<body class="min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 liquid-card border-b border-slate-800/80 px-4 lg:px-8 py-3.5">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
       
-      <!-- Brand Logo -->
+      <!-- Brand & Status Badge -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
-          <i class="fa-solid fa-clipboard-list text-xl"></i>
+        <div class="p-2.5 rounded-2xl bg-gradient-to-tr from-sky-600 to-blue-600 text-white shadow-lg shadow-sky-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+          </svg>
         </div>
         <div>
-          <h1 class="font-bold text-lg leading-tight">الحافظة السحابية</h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <span id="connectionStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-            <span id="connectionStatusText">متصل بالسحابة</span>
-          </p>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            الحافظة السحابية
+          </h1>
+          <div id="statusBadge" class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+            <span class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <span id="statusText">جاري الاتصال...</span>
+          </div>
         </div>
       </div>
 
-      <!-- Search Input -->
-      <div class="flex-1 max-w-md hidden md:block">
-        <div class="relative">
-          <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ابحث في حافظتك (نص، رابط، وسم...)" 
-            class="w-full pl-4 pr-10 py-2 bg-slate-100 dark:bg-slate-800 border-0 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-        </div>
-      </div>
-
-      <!-- Action Tools & Profile -->
+      <!-- Action Buttons -->
       <div class="flex items-center gap-2">
-        <!-- QR Quick Pair Button -->
-        <button onclick="openQrModal()" title="اقتران سريع عبر QR" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
-          <i class="fa-solid fa-qrcode text-lg"></i>
+        <!-- QR Quick Pair -->
+        <button onclick="showAppQR()" class="p-2.5 rounded-xl liquid-input hover:bg-slate-800 text-slate-300 hover:text-white transition-all" title="رمز QR للاقتران بالموبايل">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+          </svg>
         </button>
 
-        <!-- Dark/Light Mode Toggle -->
-        <button onclick="toggleDarkMode()" title="تغيير المظهر" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
-          <i id="themeIcon" class="fa-solid fa-moon text-lg"></i>
-        </button>
-
-        <!-- Auth State Button -->
+        <!-- Auth Button / User Profile -->
         <div id="authContainer">
-          <button onclick="openAuthModal()" id="loginBtn" class="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-brand-500/20 transition">
-            <i class="fa-solid fa-user-check"></i>
+          <button onclick="openAuthModal()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl liquid-input hover:bg-slate-800 text-xs font-semibold text-sky-400 border-sky-500/30 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+            </svg>
             <span>تسجيل الدخول</span>
           </button>
         </div>
       </div>
+
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+  <!-- Main Dashboard Content -->
+  <main class="max-w-4xl w-full mx-auto px-4 py-6 flex-1 space-y-6">
 
-    <!-- Mobile Search (visible only on small screens) -->
-    <div class="block md:hidden">
-      <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input type="text" id="mobileSearchInput" oninput="handleSearch('mobile')" placeholder="ابحث في حافظتك..." 
-          class="w-full pl-4 pr-10 py-2.5 bg-slate-100 dark:bg-slate-800 border-0 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
-      </div>
-    </div>
-
-    <!-- Quick Add Content Card -->
-    <section class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+    <!-- Primary Input Box Container -->
+    <div class="liquid-card rounded-3xl p-4 sm:p-6 space-y-4 relative overflow-hidden">
       
-      <!-- Input Type Tabs -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-100 dark:border-slate-800 text-sm font-semibold">
-        <button onclick="switchTab('text')" id="tab-text" class="tab-btn active text-brand-600 border-b-2 border-brand-600 pb-2 px-3 flex items-center gap-2 whitespace-nowrap">
-          <i class="fa-solid fa-pen-to-square"></i> نص / رابط
+      <!-- Input Tabs -->
+      <div class="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto no-scrollbar">
+        <button onclick="switchTab('text')" id="tab-text" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 bg-sky-600/30 text-sky-400 border border-sky-500/30">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+          <span>نص / رابط</span>
         </button>
-        <button onclick="switchTab('code')" id="tab-code" class="tab-btn text-slate-500 border-b-2 border-transparent pb-2 px-3 flex items-center gap-2 whitespace-nowrap">
-          <i class="fa-solid fa-code"></i> كود برمجي
+        <button onclick="switchTab('code')" id="tab-code" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+          <span>كود برمجي</span>
         </button>
-        <button onclick="switchTab('file')" id="tab-file" class="tab-btn text-slate-500 border-b-2 border-transparent pb-2 px-3 flex items-center gap-2 whitespace-nowrap">
-          <i class="fa-solid fa-paperclip"></i> صورة / ملف
+        <button onclick="switchTab('file')" id="tab-file" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+          <span>صورة / ملف</span>
         </button>
-        <button onclick="switchTab('audio')" id="tab-audio" class="tab-btn text-slate-500 border-b-2 border-transparent pb-2 px-3 flex items-center gap-2 whitespace-nowrap">
-          <i class="fa-solid fa-microphone"></i> تسجيل صوتي
+        <button onclick="switchTab('voice')" id="tab-voice" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+          <span>تسجيل صوتي</span>
         </button>
       </div>
 
-      <!-- Tab Forms -->
-      <!-- 1. Text & URL Tab -->
-      <div id="form-text" class="tab-form space-y-3">
-        <textarea id="textInput" rows="3" placeholder="الصق أو اكتب أي نص، ملاحظة، أو رابط هنا... (يمكنك الضغط على Ctrl+V في أي مكان)" 
-          class="w-full p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none resize-y"></textarea>
-      </div>
-
-      <!-- 2. Code Tab -->
-      <div id="form-code" class="tab-form hidden space-y-3">
-        <div class="flex gap-2">
-          <input type="text" id="codeTitle" placeholder="عنوان الكود (اختياري)" class="flex-1 p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none">
-          <select id="codeLang" class="p-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none">
-            <option value="javascript">JavaScript</option>
-            <option value="python">Python</option>
-            <option value="html">HTML / CSS</option>
-            <option value="plaintext">نص عادي</option>
-          </select>
-        </div>
-        <textarea id="codeContent" rows="4" placeholder="الصق الكود البرمجي هنا..." 
-          class="w-full p-3 font-mono text-sm bg-slate-900 text-slate-100 rounded-xl border border-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none resize-y" dir="ltr"></textarea>
-      </div>
-
-      <!-- 3. File / Image Tab -->
-      <div id="form-file" class="tab-form hidden space-y-3">
-        <div id="dropZone" class="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-6 text-center hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition"
-             onclick="document.getElementById('fileFileInput').click()">
-          <i class="fa-solid fa-cloud-arrow-up text-3xl text-brand-500 mb-2"></i>
-          <p class="text-sm font-semibold">اضغط لاختيار صورة أو ملف، أو قم بسحبه وإسقاطه هنا</p>
-          <p class="text-xs text-slate-400 mt-1">يدعم الصور، PDF، والملفات المضغوطة (حتى 10 ميجابايت)</p>
-          <input type="file" id="fileFileInput" onchange="handleFileSelect(event)" class="hidden">
-        </div>
-        <div id="filePreview" class="hidden flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-800 rounded-xl">
-          <span id="fileName" class="text-sm font-medium truncate"></span>
-          <button onclick="clearSelectedFile()" class="text-rose-500 hover:text-rose-600 p-1"><i class="fa-solid fa-circle-xmark"></i></button>
-        </div>
-      </div>
-
-      <!-- 4. Audio Voice Note Tab -->
-      <div id="form-audio" class="tab-form hidden text-center py-4 space-y-3">
-        <div class="flex items-center justify-center gap-4">
-          <button id="recordBtn" onclick="toggleAudioRecording()" class="w-16 h-16 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-rose-500/30 transition">
-            <i id="recordIcon" class="fa-solid fa-microphone"></i>
+      <!-- Tab Content Area -->
+      <div id="tabContentArea" class="relative">
+        <!-- Text & Code Area -->
+        <div id="textInputContainer" class="relative">
+          <textarea id="mainInput" rows="4" placeholder="الصق أو اكتب أي نص، ملاحظة، أو رابط هنا... (يمكنك الضغط على Ctrl+V في أي مكان)" 
+            class="w-full liquid-input rounded-2xl p-4 text-sm resize-y outline-none font-sans placeholder-slate-500"></textarea>
+          
+          <!-- Paste Shortcut Button -->
+          <button onclick="pasteFromClipboard()" class="absolute left-3 bottom-4 p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors" title="لصق من حافظة الجهاز">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
           </button>
         </div>
-        <p id="recordTimer" class="text-sm font-mono font-bold text-slate-500">00:00</p>
-        <p id="recordStatus" class="text-xs text-slate-400">اضغط على الميكروفون لبدء التسجيل</p>
+
+        <!-- File / Image Upload Box -->
+        <div id="fileInputContainer" class="hidden border-2 border-dashed border-slate-700 hover:border-sky-500 rounded-2xl p-6 text-center space-y-3 cursor-pointer transition-colors bg-slate-900/40" onclick="document.getElementById('filePicker').click()">
+          <input type="file" id="filePicker" class="hidden" onchange="handleFileSelect(event)">
+          <div class="w-12 h-12 mx-auto rounded-full bg-slate-800 flex items-center justify-center text-sky-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          </div>
+          <div>
+            <p id="fileLabel" class="text-sm font-semibold text-slate-200">اضغط هنا لرفع صورة أو ملف</p>
+            <p class="text-xs text-slate-500 mt-1">يُدعم جميع أنواع الصور، PDF، والملفات النصية (حتى 10MB)</p>
+          </div>
+        </div>
+
+        <!-- Voice Recorder Box -->
+        <div id="voiceInputContainer" class="hidden p-6 rounded-2xl bg-slate-900/40 border border-slate-800 text-center space-y-4">
+          <div id="recordStatus" class="text-xs font-semibold text-slate-400">اضغط ابدأ لتسجيل صوتي مباشر</div>
+          <div class="flex justify-center items-center gap-4">
+            <button type="button" id="recordBtn" onclick="toggleRecording()" class="w-14 h-14 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-600/30 transition-all">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+            </button>
+          </div>
+          <audio id="audioPreview" controls class="hidden w-full max-w-md mx-auto pt-2"></audio>
+        </div>
       </div>
 
-      <!-- Additional Options Row -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
-        
-        <div class="flex flex-wrap items-center gap-3">
+      <!-- Controls Row: Tags, Expiration, PIN -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs">
+        <div class="flex flex-wrap items-center gap-2">
           <!-- Tag Input -->
-          <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg">
-            <i class="fa-solid fa-hashtag text-slate-400"></i>
-            <input type="text" id="itemTag" placeholder="وسم (مثلاً: عمل)" class="bg-transparent border-0 focus:outline-none w-24 text-xs">
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-input">
+            <span class="text-slate-400">#</span>
+            <input type="text" id="clipTag" placeholder="وسم (مثلاً: عمل)" class="bg-transparent outline-none w-24 text-xs text-slate-200 placeholder-slate-500">
           </div>
 
-          <!-- Expiration Selector -->
-          <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg">
-            <i class="fa-solid fa-clock text-slate-400"></i>
-            <select id="itemExpire" class="bg-transparent border-0 focus:outline-none text-xs">
-              <option value="never">تلقائي: بلا حذف</option>
-              <option value="1h">حذف بعد ساعة</option>
-              <option value="24h">حذف بعد 24 ساعة</option>
-              <option value="7d">حذف بعد 7 أيام</option>
-            </select>
-          </div>
+          <!-- Expiration Select -->
+          <select id="clipExpiration" class="px-3 py-1.5 rounded-xl liquid-input text-xs text-slate-300 outline-none cursor-pointer">
+            <option value="never" class="bg-slate-900">🕒 تلقائي: بلا حذف</option>
+            <option value="1h" class="bg-slate-900">يحذف بعد ساعة</option>
+            <option value="24h" class="bg-slate-900">يحذف بعد 24 ساعة</option>
+            <option value="7d" class="bg-slate-900">يحذف بعد 7 أيام</option>
+          </select>
 
-          <!-- PIN Lock Checkbox -->
-          <label class="flex items-center gap-2 cursor-pointer bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition">
-            <input type="checkbox" id="itemLock" class="rounded text-brand-600 focus:ring-brand-500">
-            <span><i class="fa-solid fa-lock text-amber-500"></i> قفل برقم سري</span>
+          <!-- PIN Lock Option -->
+          <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-input cursor-pointer hover:border-slate-600 transition-colors">
+            <input type="checkbox" id="clipPinLock" class="rounded bg-slate-800 border-slate-700 text-sky-500 focus:ring-0">
+            <span class="text-slate-300">🔒 قفل برقم سري</span>
           </label>
         </div>
 
-        <!-- Submit & Direct Paste Buttons -->
-        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <button onclick="pasteFromClipboard()" class="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-paste text-brand-500"></i> لصق حافظة الجهاز
-          </button>
-          <button onclick="createNewItem()" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold flex items-center gap-2 shadow-md shadow-brand-500/20 transition">
-            <i class="fa-solid fa-plus"></i> إضافة للحافظة
-          </button>
-        </div>
-
+        <!-- Add Button -->
+        <button onclick="addClip()" class="glow-btn px-6 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-2 ml-auto sm:ml-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+          <span>إضافة للحافظة</span>
+        </button>
       </div>
 
-    </section>
-
-    <!-- Category Filters Bar -->
-    <div class="flex items-center justify-between gap-4 overflow-x-auto pb-2 text-sm">
-      <div class="flex items-center gap-2">
-        <button onclick="filterCategory('all')" id="filter-all" class="filter-btn active px-3.5 py-1.5 rounded-xl bg-brand-600 text-white font-semibold shadow-sm transition">الكل</button>
-        <button onclick="filterCategory('pinned')" id="filter-pinned" class="filter-btn px-3.5 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">⭐ المثبتة</button>
-        <button onclick="filterCategory('text')" id="filter-text" class="filter-btn px-3.5 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">📝 نصوص وروابط</button>
-        <button onclick="filterCategory('code')" id="filter-code" class="filter-btn px-3.5 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">💻 أكواد</button>
-        <button onclick="filterCategory('media')" id="filter-media" class="filter-btn px-3.5 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">📁 ملفات وصوت</button>
-        <button onclick="filterCategory('trash')" id="filter-trash" class="filter-btn px-3.5 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">🗑️ سلة المهملات</button>
-      </div>
-
-      <span id="itemsCountBadge" class="text-xs text-slate-400 font-semibold whitespace-nowrap">0 عنصر</span>
     </div>
 
-    <!-- Items Grid Display -->
-    <div id="itemsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <!-- Items dynamically populated via JavaScript -->
+    <!-- Search Bar -->
+    <div class="relative">
+      <input type="text" id="searchInput" oninput="renderClips()" placeholder="ابحث في حافظتك (بالنص، الكود، الرابط، أو الوسم)..." 
+        class="w-full liquid-input rounded-2xl pr-11 pl-4 py-3 text-sm outline-none placeholder-slate-500 shadow-inner">
+      <div class="absolute right-3.5 top-3.5 text-slate-500 pointer-events-none">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      </div>
     </div>
 
-    <!-- Empty State -->
-    <div id="emptyState" class="hidden text-center py-16 space-y-3">
-      <div class="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto text-2xl">
-        <i class="fa-solid fa-inbox"></i>
+    <!-- Filter Pills (Compact & Smooth) -->
+    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+      <button onclick="setFilter('all')" id="filter-all" class="filter-pill active px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-sky-600 text-white shadow-lg shadow-sky-600/30 flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+        <span>الكل</span>
+      </button>
+      <button onclick="setFilter('pinned')" id="filter-pinned" class="filter-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap liquid-input text-slate-400 hover:text-white flex items-center gap-1.5">
+        <span>⭐ المثبتة</span>
+      </button>
+      <button onclick="setFilter('text')" id="filter-text" class="filter-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap liquid-input text-slate-400 hover:text-white flex items-center gap-1.5">
+        <span>📝 نصوص وروابط</span>
+      </button>
+      <button onclick="setFilter('code')" id="filter-code" class="filter-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap liquid-input text-slate-400 hover:text-white flex items-center gap-1.5">
+        <span>💻 أكواد</span>
+      </button>
+      <button onclick="setFilter('media')" id="filter-media" class="filter-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap liquid-input text-slate-400 hover:text-white flex items-center gap-1.5">
+        <span>📁 ملفات وصوت</span>
+      </button>
+      <button onclick="setFilter('trash')" id="filter-trash" class="filter-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap liquid-input text-slate-400 hover:text-rose-400 flex items-center gap-1.5">
+        <span>🗑️ سلة المهملات</span>
+      </button>
+    </div>
+
+    <!-- Clips Cards Grid -->
+    <div id="clipsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Dynamic Clips Items -->
+    </div>
+
+    <!-- Empty State Message -->
+    <div id="emptyState" class="hidden flex-col items-center justify-center py-12 text-center space-y-3">
+      <div class="p-4 rounded-full bg-slate-900 border border-slate-800 text-slate-600">
+        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
       </div>
-      <p class="text-slate-500 font-medium">لا توجد عناصر في حافظتك حالياً</p>
-      <p class="text-xs text-slate-400">قم بإضافة عنصر جديد أو انسخ أي شيء للبدء بالمزامنة!</p>
+      <p class="text-sm font-semibold text-slate-400">لا توجد عناصر في هذه الفئة حالياً</p>
     </div>
 
   </main>
 
-  <!-- Auth Modal -->
-  <div id="authModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 relative">
-      <button onclick="closeAuthModal()" class="absolute left-4 top-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
-      
-      <div class="text-center space-y-1">
-        <h3 class="text-xl font-bold">تسجيل الدخول / حساب جديد</h3>
-        <p class="text-xs text-slate-400">سجل دخولك لمزامنة الحافظة بين كل أجهزتك تلقائياً</p>
-      </div>
-
-      <div class="space-y-3 pt-2">
-        <button onclick="loginWithGoogle()" class="w-full py-2.5 px-4 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-sm transition">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="Google">
-          <span>المتابعة باستخدام Google</span>
+  <!-- Auth / Login Modal -->
+  <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="liquid-card rounded-3xl max-w-md w-full p-6 space-y-5 border border-slate-800 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <span>تسجيل الدخول للمزامنة</span>
+        </h3>
+        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
-
-        <div class="flex items-center my-3">
-          <div class="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
-          <span class="px-3 text-xs text-slate-400">أو عبر البريد</span>
-          <div class="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
-        </div>
-
-        <input type="email" id="authEmail" placeholder="البريد الإلكتروني" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl border-0 text-sm focus:ring-2 focus:ring-brand-500">
-        <input type="password" id="authPassword" placeholder="كلمة المرور" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl border-0 text-sm focus:ring-2 focus:ring-brand-500">
-
-        <div class="flex gap-2 pt-1">
-          <button onclick="loginWithEmail()" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold text-sm transition">تسجيل الدخول</button>
-          <button onclick="registerWithEmail()" class="flex-1 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 font-semibold text-sm transition">إنشاء حساب</button>
-        </div>
-
-        <button onclick="loginAnonymously()" class="w-full py-2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline">المتابعة كزائر مؤقت</button>
       </div>
+
+      <!-- Google Quick Login Button -->
+      <button onclick="loginWithGoogle()" class="w-full py-3 px-4 rounded-xl liquid-input hover:bg-slate-800 flex items-center justify-center gap-3 text-sm font-semibold text-slate-200 transition-colors">
+        <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+        <span>تسجيل الدخول بواسطة Google</span>
+      </button>
+
+      <div class="relative flex items-center justify-center">
+        <div class="border-t border-slate-800 w-full"></div>
+        <span class="bg-[#0b1329] px-3 text-xs text-slate-500 absolute">أو البريد الإلكتروني</span>
+      </div>
+
+      <!-- Email / Password Form -->
+      <form onsubmit="handleEmailAuth(event)" class="space-y-3">
+        <input type="email" id="authEmail" required placeholder="البريد الإلكتروني" class="w-full liquid-input rounded-xl px-4 py-2.5 text-xs">
+        <input type="password" id="authPass" required placeholder="كلمة المرور" class="w-full liquid-input rounded-xl px-4 py-2.5 text-xs">
+        <div class="flex gap-2">
+          <button type="submit" name="action" value="login" class="flex-1 glow-btn py-2.5 rounded-xl text-xs font-bold text-white">دخول</button>
+          <button type="submit" name="action" value="signup" class="flex-1 py-2.5 rounded-xl liquid-input hover:bg-slate-800 text-xs font-bold text-slate-300">حساب جديد</button>
+        </div>
+      </form>
     </div>
   </div>
 
   <!-- QR Pairing Modal -->
-  <div id="qrModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4 relative">
-      <button onclick="closeQrModal()" class="absolute left-4 top-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-      <h3 class="text-lg font-bold">مسح QR للاقتران بالموبايل</h3>
-      <p class="text-xs text-slate-400">افتح كاميرا الهاتف وافحص الرمز لفتح موقع الحافظة مباشرة على موبايلك:</p>
-      
-      <div class="flex justify-center p-4 bg-white rounded-xl border border-slate-200 w-fit mx-auto">
+  <div id="qrModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="liquid-card rounded-3xl max-w-xs w-full p-6 text-center space-y-4 border border-slate-800">
+      <h3 class="text-sm font-bold text-white">اقتران سريع للموبايل</h3>
+      <p class="text-xs text-slate-400">امسح الرمز بواسطة كاميرا الموبايل لفتح الصفحة مباشرة والمزامنة</p>
+      <div class="p-3 bg-white rounded-2xl w-fit mx-auto shadow-xl">
         <div id="qrcode"></div>
       </div>
-
-      <button onclick="copyCurrentUrl()" class="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-semibold rounded-xl">
-        <i class="fa-solid fa-link"></i> نسخ رابط الصفحة
-      </button>
+      <button onclick="closeQRModal()" class="w-full py-2 rounded-xl liquid-input hover:bg-slate-800 text-xs font-semibold text-slate-300">إغلاق</button>
     </div>
   </div>
 
-  <!-- PIN Entry Modal for Locked Items -->
-  <div id="pinModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-900 w-full max-w-xs rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4">
-      <i class="fa-solid fa-lock text-3xl text-amber-500"></i>
-      <h3 class="text-md font-bold">أدخل الرقم السري لفك القفل</h3>
-      <input type="password" id="pinInput" placeholder="****" maxlength="6" class="w-full text-center tracking-widest text-lg p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl border-0 focus:ring-2 focus:ring-brand-500">
-      <div class="flex gap-2">
-        <button onclick="confirmUnlockPin()" class="flex-1 py-2 bg-brand-600 text-white rounded-xl font-bold text-xs">فتح</button>
-        <button onclick="closePinModal()" class="flex-1 py-2 bg-slate-200 dark:bg-slate-800 rounded-xl font-bold text-xs">إلغاء</button>
-      </div>
-    </div>
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 px-4 py-3 bg-slate-900 border border-sky-500/40 text-sky-400 rounded-2xl shadow-2xl text-xs font-semibold">
+    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+    <span id="toastMsg">تم النسخ بنجاح!</span>
   </div>
-
-  <!-- Global Toast Notification Container -->
-  <div id="toastContainer" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script>
-    
-    // User Firebase Configuration
+    // Firebase Configuration from User SDK
     const firebaseConfig = {
       apiKey: "AIzaSyASkHiam15tKJALtFGXPvs5K3Na_XrwSJ0",
       authDomain: "ayman-44297.firebaseapp.com",
@@ -360,688 +371,543 @@
       measurementId: "G-X2BX9LR8NC"
     };
 
-    let app, auth, db;
-    let isFirebaseActive = false;
+    // State
+    let db = null;
+    let auth = null;
     let currentUser = null;
-    let itemsData = [];
-    let currentCategory = 'all';
     let activeTab = 'text';
+    let activeFilter = 'all';
+    let recordedAudioBase64 = null;
     let selectedFileBase64 = null;
-    let selectedFileName = '';
     let mediaRecorder = null;
     let audioChunks = [];
-    let recordTimerInterval = null;
-    let pendingUnlockItemId = null;
+    let isRecording = false;
 
-    // App Initialization
-    window.onload = function() {
-      initApp();
-      setupGlobalPaste();
-      checkDarkModePreference();
-    };
+    let localClips = JSON.parse(localStorage.getItem('cloud_clipboard_data')) || [];
 
-    function initApp() {
+    // Initialize App
+    window.addEventListener('DOMContentLoaded', () => {
+      initFirebase();
+      renderClips();
+      listenGlobalPaste();
+    });
+
+    function initFirebase() {
       try {
-        if (typeof firebase !== 'undefined') {
-          app = firebase.initializeApp(firebaseConfig);
-          auth = firebase.auth();
-          db = firebase.firestore();
-
-          auth.onAuthStateChanged(user => {
-            currentUser = user;
-            updateAuthUI();
-            subscribeToFirestore();
-          });
-          isFirebaseActive = true;
-        } else {
-          throw new Error("Firebase SDK not loaded");
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
         }
-      } catch (err) {
-        console.warn("Firebase Init fallback to LocalStorage:", err);
-        isFirebaseActive = false;
-        updateConnectionStatus(false, "وضع حلي (محلي)");
-        loadLocalItems();
-      }
-    }
+        auth = firebase.auth();
+        db = firebase.firestore();
 
-    function updateConnectionStatus(isOnline, customText) {
-      const dot = document.getElementById('connectionStatusDot');
-      const text = document.getElementById('connectionStatusText');
-      if (isOnline) {
-        dot.className = "w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse";
-        text.innerText = customText || "متصل بالسحابة";
-      } else {
-        dot.className = "w-2 h-2 rounded-full bg-amber-500 inline-block";
-        text.innerText = customText || "وضع التخزين المحلي";
-      }
-    }
-
-
-    function subscribeToFirestore() {
-      if (!isFirebaseActive || !currentUser) {
-        loadLocalItems();
-        return;
-      }
-
-      updateConnectionStatus(true, "مزامنة فورية حية");
-
-      db.collection('clipboards')
-        .where('userId', '==', currentUser.uid)
-        .onSnapshot(snapshot => {
-          let items = [];
-          snapshot.forEach(doc => {
-            items.push({ id: doc.id, ...doc.data() });
-          });
-          itemsData = filterExpiredItems(items);
-          renderItems();
-        }, err => {
-          console.warn("Firestore listener warning:", err);
-          updateConnectionStatus(false, "تخزين محلي (قواعد غير مفعلة)");
-          loadLocalItems();
-        });
-    }
-
-    function loadLocalItems() {
-      const raw = localStorage.getItem('cloud_clipboard_data');
-      if (raw) {
-        try {
-          itemsData = filterExpiredItems(JSON.parse(raw));
-        } catch (e) {
-          itemsData = [];
-        }
-      } else {
-        itemsData = [];
-      }
-      renderItems();
-    }
-
-    function saveItems() {
-      if (isFirebaseActive && currentUser) {
-        // Syncing happens directly on Firestore CRUD operations
-      } else {
-        localStorage.setItem('cloud_clipboard_data', JSON.stringify(itemsData));
-        renderItems();
-      }
-    }
-
-    function filterExpiredItems(items) {
-      const now = Date.now();
-      return items.filter(item => !item.expireAt || item.expireAt > now);
-    }
-
-
-    function createNewItem() {
-      const tag = document.getElementById('itemTag').value.trim();
-      const expire = document.getElementById('itemExpire').value;
-      const isLock = document.getElementById('itemLock').checked;
-
-      let expireTimestamp = null;
-      if (expire === '1h') expireTimestamp = Date.now() + (3600 * 1000);
-      else if (expire === '24h') expireTimestamp = Date.now() + (24 * 3600 * 1000);
-      else if (expire === '7d') expireTimestamp = Date.now() + (7 * 24 * 3600 * 1000);
-
-      let pinCode = isLock ? "1234" : null; // Default PIN for demo if checked
-
-      let newItem = {
-        userId: currentUser ? currentUser.uid : 'guest',
-        tag: tag || null,
-        expireAt: expireTimestamp,
-        isLocked: isLock,
-        pin: pinCode,
-        isPinned: false,
-        isTrash: false,
-        createdAt: Date.now()
-      };
-
-      if (activeTab === 'text') {
-        const text = document.getElementById('textInput').value.trim();
-        if (!text) { showToast("الرجاء إدخال نص أولاً", "error"); return; }
-        
-        newItem.type = isUrl(text) ? 'url' : 'text';
-        newItem.content = text;
-        document.getElementById('textInput').value = '';
-
-      } else if (activeTab === 'code') {
-        const code = document.getElementById('codeContent').value.trim();
-        const title = document.getElementById('codeTitle').value.trim();
-        const lang = document.getElementById('codeLang').value;
-        if (!code) { showToast("الرجاء أدخل كوداً برمجياً", "error"); return; }
-
-        newItem.type = 'code';
-        newItem.content = code;
-        newItem.title = title || 'كود برمجي';
-        newItem.language = lang;
-        document.getElementById('codeContent').value = '';
-
-      } else if (activeTab === 'file') {
-        if (!selectedFileBase64) { showToast("الرجاء اختيار ملف أو صورة", "error"); return; }
-        newItem.type = selectedFileBase64.startsWith('data:image') ? 'image' : 'file';
-        newItem.content = selectedFileBase64;
-        newItem.title = selectedFileName;
-        clearSelectedFile();
-
-      } else if (activeTab === 'audio') {
-        showToast("يرجى إنهاء التسجيل الصوتي للحفظ تلقائياً", "info");
-        return;
-      }
-
-      commitItemSave(newItem);
-    }
-
-    function commitItemSave(item) {
-      if (isFirebaseActive && currentUser) {
-        db.collection('clipboards').add(item)
-          .then(() => showToast("تم الحفظ والمزامنة بنجاح!", "success"))
-          .catch(err => {
-            console.error("Firestore Save Error:", err);
-            saveLocallyDirectly(item);
-          });
-      } else {
-        saveLocallyDirectly(item);
-      }
-    }
-
-    function saveLocallyDirectly(item) {
-      item.id = 'loc_' + Date.now();
-      itemsData.unshift(item);
-      saveItems();
-      showToast("تم الحفظ على الجهاز المحلي!", "success");
-    }
-
-
-    function renderItems() {
-      const grid = document.getElementById('itemsGrid');
-      const emptyState = document.getElementById('emptyState');
-      const countBadge = document.getElementById('itemsCountBadge');
-
-      const searchQuery = (document.getElementById('searchInput').value || document.getElementById('mobileSearchInput').value || '').toLowerCase();
-
-      let filtered = itemsData.filter(item => {
-        // Category Filter
-        if (currentCategory === 'pinned' && !item.isPinned) return false;
-        if (currentCategory === 'text' && item.type !== 'text' && item.type !== 'url') return false;
-        if (currentCategory === 'code' && item.type !== 'code') return false;
-        if (currentCategory === 'media' && item.type !== 'image' && item.type !== 'file' && item.type !== 'audio') return false;
-        if (currentCategory === 'trash' && !item.isTrash) return false;
-        if (currentCategory !== 'trash' && item.isTrash) return false;
-
-        // Search Filter
-        if (searchQuery) {
-          const contentMatch = (item.content || '').toLowerCase().includes(searchQuery);
-          const titleMatch = (item.title || '').toLowerCase().includes(searchQuery);
-          const tagMatch = (item.tag || '').toLowerCase().includes(searchQuery);
-          return contentMatch || titleMatch || tagMatch;
-        }
-
-        return true;
-      });
-
-      // Sort: Pinned first, then newest
-      filtered.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0) || b.createdAt - a.createdAt);
-
-      countBadge.innerText = `${filtered.length} عنصر`;
-
-      if (filtered.length === 0) {
-        grid.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        return;
-      } else {
-        emptyState.classList.add('hidden');
-      }
-
-      grid.innerHTML = filtered.map(item => renderItemCard(item)).join('');
-      
-      // Highlight Prism code snippets
-      setTimeout(() => { if (window.Prism) Prism.highlightAll(); }, 50);
-    }
-
-    function renderItemCard(item) {
-      const isLocked = item.isLocked && !item.unlocked;
-
-      return `
-        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-3 relative group transition hover:border-brand-500/50">
-          
-          <!-- Top Badges & Actions -->
-          <div class="flex items-center justify-between text-xs">
-            <div class="flex items-center gap-1.5">
-              ${item.isPinned ? '<span class="bg-amber-100 dark:bg-amber-900/40 text-amber-600 px-2 py-0.5 rounded-md font-bold"><i class="fa-solid fa-thumbtack"></i> مثبت</span>' : ''}
-              ${item.tag ? `<span class="bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-md">#${item.tag}</span>` : ''}
-              ${item.type === 'url' ? '<span class="bg-blue-100 dark:bg-blue-900/40 text-blue-600 px-2 py-0.5 rounded-md font-semibold"><i class="fa-solid fa-link"></i> رابط</span>' : ''}
-            </div>
-
-            <div class="flex items-center gap-1">
-              <button onclick="togglePin('${item.id}')" title="تثبيت" class="p-1.5 text-slate-400 hover:text-amber-500"><i class="fa-solid fa-thumbtack"></i></button>
-              ${item.isTrash ? `
-                <button onclick="restoreItem('${item.id}')" title="استرجاع" class="p-1.5 text-slate-400 hover:text-emerald-500"><i class="fa-solid fa-rotate-left"></i></button>
-                <button onclick="permanentDeleteItem('${item.id}')" title="حذف نهائي" class="p-1.5 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash-can"></i></button>
-              ` : `
-                <button onclick="moveToTrash('${item.id}')" title="حذف" class="p-1.5 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash"></i></button>
-              `}
-            </div>
-          </div>
-
-          <!-- Card Main Content -->
-          <div class="space-y-2 flex-1">
-            ${isLocked ? `
-              <div class="text-center py-6 space-y-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
-                <i class="fa-solid fa-lock text-amber-500 text-2xl"></i>
-                <p class="text-xs font-semibold text-slate-500">المحتوى محمي برقم سري</p>
-                <button onclick="openPinModal('${item.id}')" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg transition">فتح القفل</button>
-              </div>
-            ` : renderCardBody(item)}
-          </div>
-
-          <!-- Card Footer -->
-          <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400">
-            <span>${formatTimeAgo(item.createdAt)}</span>
-            ${!isLocked ? `
-              <button onclick="copyItemContent('${item.id}')" class="px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-brand-600 hover:text-white text-slate-700 dark:text-slate-200 font-bold rounded-lg flex items-center gap-1 transition">
-                <i class="fa-solid fa-copy"></i> نسخ
-              </button>
-            ` : ''}
-          </div>
-
-        </div>
-      `;
-    }
-
-    function renderCardBody(item) {
-      if (item.type === 'text') {
-        return `<p class="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap break-words">${escapeHtml(item.content)}</p>`;
-      } else if (item.type === 'url') {
-        return `
-          <div class="space-y-1">
-            <a href="${item.content}" target="_blank" class="text-sm font-semibold text-brand-500 hover:underline break-all flex items-center gap-1.5">
-              <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> ${escapeHtml(item.content)}
-            </a>
-          </div>
-        `;
-      } else if (item.type === 'code') {
-        return `
-          <div class="space-y-1">
-            <span class="text-xs font-bold text-slate-400">${item.title || 'كود'}</span>
-            <pre class="rounded-xl text-xs max-h-48 overflow-y-auto" dir="ltr"><code class="language-${item.language || 'javascript'}">${escapeHtml(item.content)}</code></pre>
-          </div>
-        `;
-      } else if (item.type === 'image') {
-        return `
-          <div class="space-y-1">
-            <img src="${item.content}" alt="Image" class="w-full max-h-48 object-cover rounded-xl border border-slate-200 dark:border-slate-800">
-          </div>
-        `;
-      } else if (item.type === 'file') {
-        return `
-          <div class="flex items-center gap-3 p-3 bg-slate-100 dark:bg-slate-800 rounded-xl">
-            <i class="fa-solid fa-file-lines text-2xl text-brand-500"></i>
-            <div class="flex-1 truncate">
-              <p class="text-xs font-bold truncate">${escapeHtml(item.title || 'ملف مرفق')}</p>
-              <a href="${item.content}" download="${item.title || 'file'}" class="text-xs text-brand-500 hover:underline font-semibold">تحميل الملف</a>
-            </div>
-          </div>
-        `;
-      } else if (item.type === 'audio') {
-        return `
-          <div class="space-y-1">
-            <span class="text-xs font-bold text-slate-400"><i class="fa-solid fa-microphone"></i> تسجيل صوتي</span>
-            <audio controls src="${item.content}" class="w-full h-10 rounded-xl"></audio>
-          </div>
-        `;
-      }
-      return '';
-    }
-
-
-    function copyItemContent(id) {
-      const item = itemsData.find(i => i.id === id);
-      if (!item) return;
-
-      const textToCopy = item.content;
-      
-      const tempInput = document.createElement("textarea");
-      tempInput.value = textToCopy;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      document.execCommand("copy");
-      document.body.removeChild(tempInput);
-
-      showToast("تم النسخ للحافظة بنجاح! 📋", "success");
-    }
-
-    function pasteFromClipboard() {
-      if (navigator.clipboard && navigator.clipboard.readText) {
-        navigator.clipboard.readText().then(text => {
-          if (text) {
-            document.getElementById('textInput').value = text;
-            showToast("تم اللصق من حافظة جهازك!", "info");
+        auth.onAuthStateChanged(user => {
+          currentUser = user;
+          updateAuthUI();
+          if (user) {
+            updateStatus(true, 'سحابي متصل: ' + (user.email || 'مستخدم مسجل'));
+            subscribeFirestore();
           } else {
-            showToast("الحافظة فارغة", "warning");
+            updateStatus(false, 'تخزين محلي (سجل الدخول للمزامنة)');
+            renderClips();
           }
-        }).catch(() => {
-          showToast("اضغط Ctrl+V في مربع النص للصق", "info");
         });
+      } catch (err) {
+        console.warn('Firebase init fallback:', err);
+        updateStatus(false, 'تخزين محلي (النموذج الاحتياطي)');
+      }
+    }
+
+    function updateStatus(isOnline, text) {
+      const badge = document.getElementById('statusBadge');
+      const label = document.getElementById('statusText');
+      label.innerText = text;
+      if (isOnline) {
+        badge.firstElementChild.className = 'inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
       } else {
-        showToast("اضغط Ctrl+V للصق المباشر", "info");
+        badge.firstElementChild.className = 'inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse';
       }
     }
-
-    function setupGlobalPaste() {
-      window.addEventListener('paste', e => {
-        const activeElem = document.activeElement;
-        if (activeElem && (activeElem.tagName === 'INPUT' || activeElem.tagName === 'TEXTAREA')) {
-          return; // Allow standard input pasting
-        }
-
-        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-        if (pastedText) {
-          switchTab('text');
-          document.getElementById('textInput').value = pastedText;
-          showToast("تم التقاط النص المنسوخ تلقائياً!", "info");
-        }
-      });
-    }
-
-    /* Voice Audio Recorder */
-    function toggleAudioRecording() {
-      const btn = document.getElementById('recordBtn');
-      const icon = document.getElementById('recordIcon');
-      const status = document.getElementById('recordStatus');
-      const timer = document.getElementById('recordTimer');
-
-      if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-          mediaRecorder = new MediaRecorder(stream);
-          audioChunks = [];
-
-          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-          mediaRecorder.onstop = () => {
-            const blob = new Blob(audioChunks, { type: 'audio/mp3' });
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = () => {
-              commitItemSave({
-                userId: currentUser ? currentUser.uid : 'guest',
-                type: 'audio',
-                content: reader.result,
-                createdAt: Date.now()
-              });
-            };
-          };
-
-          mediaRecorder.start();
-          btn.classList.replace('bg-rose-500', 'bg-amber-500');
-          icon.className = "fa-solid fa-stop";
-          status.innerText = "جاري التسجيل الان...";
-
-          let sec = 0;
-          recordTimerInterval = setInterval(() => {
-            sec++;
-            let m = Math.floor(sec / 60).toString().padStart(2, '0');
-            let s = (sec % 60).toString().padStart(2, '0');
-            timer.innerText = `${m}:${s}`;
-          }, 1000);
-
-        }).catch(() => showToast("تعذر الوصول للميكروفون", "error"));
-
-      } else {
-        mediaRecorder.stop();
-        clearInterval(recordTimerInterval);
-        btn.classList.replace('bg-amber-500', 'bg-rose-500');
-        icon.className = "fa-solid fa-microphone";
-        status.innerText = "اضغط على الميكروفون لبدء التسجيل";
-        timer.innerText = "00:00";
-      }
-    }
-
-    /* File Input Handler */
-    function handleFileSelect(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      if (file.size > 10 * 1024 * 1024) {
-        showToast("حجم الملف يجب ألا يتجاوز 10 ميجابايت", "error");
-        return;
-      }
-
-      selectedFileName = file.name;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        selectedFileBase64 = evt.target.result;
-        document.getElementById('fileName').innerText = file.name;
-        document.getElementById('filePreview').classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function clearSelectedFile() {
-      selectedFileBase64 = null;
-      selectedFileName = '';
-      document.getElementById('fileFileInput').value = '';
-      document.getElementById('filePreview').classList.add('hidden');
-    }
-
-    /* Item Operations: Item Pin / Lock / Trash */
-    function togglePin(id) {
-      const item = itemsData.find(i => i.id === id);
-      if (item) {
-        item.isPinned = !item.isPinned;
-        updateItemInDb(item);
-      }
-    }
-
-    function moveToTrash(id) {
-      const item = itemsData.find(i => i.id === id);
-      if (item) {
-        item.isTrash = true;
-        updateItemInDb(item);
-        showToast("تم نقل العنصر لسلة المهملات", "info");
-      }
-    }
-
-    function restoreItem(id) {
-      const item = itemsData.find(i => i.id === id);
-      if (item) {
-        item.isTrash = false;
-        updateItemInDb(item);
-        showToast("تم استرجاع العنصر", "success");
-      }
-    }
-
-    function permanentDeleteItem(id) {
-      if (isFirebaseActive && currentUser && !id.startsWith('loc_')) {
-        db.collection('clipboards').doc(id).delete();
-      }
-      itemsData = itemsData.filter(i => i.id !== id);
-      saveItems();
-      showToast("تم الحذف النهائي", "warning");
-    }
-
-    function updateItemInDb(item) {
-      if (isFirebaseActive && currentUser && !item.id.startsWith('loc_')) {
-        db.collection('clipboards').doc(item.id).set(item);
-      } else {
-        saveItems();
-      }
-    }
-
-    /* Unlock PIN Modal */
-    function openPinModal(id) {
-      pendingUnlockItemId = id;
-      document.getElementById('pinInput').value = '';
-      document.getElementById('pinModal').classList.remove('hidden');
-    }
-
-    function closePinModal() {
-      document.getElementById('pinModal').classList.add('hidden');
-      pendingUnlockItemId = null;
-    }
-
-    function confirmUnlockPin() {
-      const pin = document.getElementById('pinInput').value;
-      const item = itemsData.find(i => i.id === pendingUnlockItemId);
-      if (item) {
-        if (pin === item.pin || pin === '1234') {
-          item.unlocked = true;
-          closePinModal();
-          renderItems();
-          showToast("تم فتح القفل!", "success");
-        } else {
-          showToast("الرقم السري غير صحيح", "error");
-        }
-      }
-    }
-
-
-    function switchTab(tab) {
-      activeTab = tab;
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active', 'text-brand-600', 'border-brand-600');
-        btn.classList.add('text-slate-500', 'border-transparent');
-      });
-      document.getElementById(`tab-${tab}`).classList.add('active', 'text-brand-600', 'border-brand-600');
-
-      document.querySelectorAll('.tab-form').forEach(form => form.classList.add('hidden'));
-      document.getElementById(`form-${tab}`).classList.remove('hidden');
-    }
-
-    function filterCategory(cat) {
-      currentCategory = cat;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.className = "filter-btn px-3.5 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition";
-      });
-      const activeBtn = document.getElementById(`filter-${cat}`);
-      if (activeBtn) activeBtn.className = "filter-btn active px-3.5 py-1.5 rounded-xl bg-brand-600 text-white font-semibold shadow-sm transition";
-      renderItems();
-    }
-
-    function handleSearch() { renderItems(); }
-
-    function openQrModal() {
-      document.getElementById('qrModal').classList.remove('hidden');
-      const container = document.getElementById('qrcode');
-      container.innerHTML = '';
-      new QRCode(container, {
-        text: window.location.href,
-        width: 160,
-        height: 160
-      });
-    }
-
-    function closeQrModal() { document.getElementById('qrModal').classList.add('hidden'); }
-
-    function copyCurrentUrl() {
-      navigator.clipboard.writeText(window.location.href);
-      showToast("تم نسخ رابط الصفحة", "success");
-    }
-
-    function toggleDarkMode() {
-      document.documentElement.classList.toggle('dark');
-      const isDark = document.documentElement.classList.contains('dark');
-      document.getElementById('themeIcon').className = isDark ? "fa-solid fa-sun text-lg" : "fa-solid fa-moon text-lg";
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    }
-
-    function checkDarkModePreference() {
-      if (localStorage.getItem('theme') === 'light') {
-        document.documentElement.classList.remove('dark');
-        document.getElementById('themeIcon').className = "fa-solid fa-moon text-lg";
-      }
-    }
-
-    /* Auth Modals Logic */
-    function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
-    function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
 
     function updateAuthUI() {
       const container = document.getElementById('authContainer');
       if (currentUser) {
         container.innerHTML = `
           <div class="flex items-center gap-2">
-            <span class="text-xs font-bold text-slate-500 hidden sm:inline">${currentUser.email || 'زائر'}</span>
-            <button onclick="logout()" title="تسجيل الخروج" class="p-2.5 rounded-xl bg-rose-100 dark:bg-rose-900/40 text-rose-600 transition">
-              <i class="fa-solid fa-right-from-bracket"></i>
+            <span class="text-xs font-semibold text-slate-300 max-w-[120px] truncate hidden sm:inline">${currentUser.email || 'حساب زائر'}</span>
+            <button onclick="logout()" class="p-2 rounded-xl liquid-input hover:bg-rose-950/40 text-rose-400 transition-colors" title="تسجيل الخروج">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
             </button>
           </div>
         `;
       } else {
         container.innerHTML = `
-          <button onclick="openAuthModal()" class="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-md transition">
-            <i class="fa-solid fa-user-check"></i>
+          <button onclick="openAuthModal()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl liquid-input hover:bg-slate-800 text-xs font-semibold text-sky-400 border-sky-500/30 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
             <span>تسجيل الدخول</span>
           </button>
         `;
       }
     }
 
-    function loginWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).then(() => closeAuthModal()).catch(e => showToast(e.message, "error"));
+    function subscribeFirestore() {
+      if (!currentUser || !db) return;
+      db.collection('clips')
+        .where('uid', '==', currentUser.uid)
+        .onSnapshot(snapshot => {
+          localClips = [];
+          snapshot.forEach(doc => {
+            localClips.push({ id: doc.id, ...doc.data() });
+          });
+          saveLocalBackup();
+          renderClips();
+        }, err => {
+          console.error("Firestore listener error:", err);
+          updateStatus(false, 'تخزين محلي (قواعد غير مفعلة)');
+        });
     }
 
-    function loginWithEmail() {
-      const e = document.getElementById('authEmail').value;
-      const p = document.getElementById('authPassword').value;
-      auth.signInWithEmailAndPassword(e, p).then(() => closeAuthModal()).catch(err => showToast(err.message, "error"));
+    // Tabs Switching
+    function switchTab(type) {
+      activeTab = type;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = 'tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60';
+      });
+
+      const current = document.getElementById(`tab-${type}`);
+      if (current) {
+        current.className = 'tab-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 bg-sky-600/30 text-sky-400 border border-sky-500/30';
+      }
+
+      document.getElementById('textInputContainer').classList.add('hidden');
+      document.getElementById('fileInputContainer').classList.add('hidden');
+      document.getElementById('voiceInputContainer').classList.add('hidden');
+
+      if (type === 'text' || type === 'code') {
+        document.getElementById('textInputContainer').classList.remove('hidden');
+      } else if (type === 'file') {
+        document.getElementById('fileInputContainer').classList.remove('hidden');
+      } else if (type === 'voice') {
+        document.getElementById('voiceInputContainer').classList.remove('hidden');
+      }
     }
 
-    function registerWithEmail() {
-      const e = document.getElementById('authEmail').value;
-      const p = document.getElementById('authPassword').value;
-      auth.createUserWithEmailAndPassword(e, p).then(() => closeAuthModal()).catch(err => showToast(err.message, "error"));
+    // Voice Recorder Logic
+    async function toggleRecording() {
+      const statusLbl = document.getElementById('recordStatus');
+      const recordBtn = document.getElementById('recordBtn');
+      const audioPreview = document.getElementById('audioPreview');
+
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => {
+              recordedAudioBase64 = reader.result;
+              audioPreview.src = recordedAudioBase64;
+              audioPreview.classList.remove('hidden');
+            };
+          };
+
+          mediaRecorder.start();
+          isRecording = true;
+          statusLbl.innerText = 'جاري التسجيل الان... اضغط لإيقاف الحفظ';
+          recordBtn.classList.replace('bg-rose-600', 'bg-amber-500');
+        } catch (err) {
+          showToast('لا يمكن الوصول للميكروفون');
+        }
+      } else {
+        mediaRecorder.stop();
+        isRecording = false;
+        statusLbl.innerText = 'تم التسجيل جاهز للإضافة للحافظة';
+        recordBtn.classList.replace('bg-amber-500', 'bg-rose-600');
+      }
     }
 
-    function loginAnonymously() {
-      auth.signInAnonymously().then(() => closeAuthModal()).catch(err => showToast(err.message, "error"));
+    // File Selector
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('حجم الملف كبير جداً (الأقصى 10MB)');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        selectedFileBase64 = {
+          name: file.name,
+          type: file.type.startsWith('image/') ? 'image' : 'file',
+          data: e.target.result
+        };
+        document.getElementById('fileLabel').innerText = `تم اختيار: ${file.name}`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Add Item to Clipboard
+    async function addClip() {
+      const contentText = document.getElementById('mainInput').value.trim();
+      const tag = document.getElementById('clipTag').value.trim();
+      const expiration = document.getElementById('clipExpiration').value;
+      const isPinLocked = document.getElementById('clipPinLock').checked;
+
+      let payload = {
+        type: activeTab,
+        tag: tag || '',
+        expiration: expiration,
+        isLocked: isPinLocked,
+        pinned: false,
+        favorite: false,
+        inTrash: false,
+        createdAt: new Date().toISOString()
+      };
+
+      if (activeTab === 'text' || activeTab === 'code') {
+        if (!contentText) {
+          showToast('يرجى كتابة أو لصق محتوى أولاً');
+          return;
+        }
+        payload.content = contentText;
+      } else if (activeTab === 'file') {
+        if (!selectedFileBase64) {
+          showToast('يرجى اختيار ملف أو صورة أولاً');
+          return;
+        }
+        payload.content = selectedFileBase64.data;
+        payload.fileName = selectedFileBase64.name;
+        payload.fileType = selectedFileBase64.type;
+      } else if (activeTab === 'voice') {
+        if (!recordedAudioBase64) {
+          showToast('يرجى تسجيل مقطع صوتي أولاً');
+          return;
+        }
+        payload.content = recordedAudioBase64;
+        payload.fileType = 'audio';
+      }
+
+      if (currentUser && db) {
+        try {
+          payload.uid = currentUser.uid;
+          await db.collection('clips').add(payload);
+          showToast('تمت المزامنة وحفظ العنصر!');
+        } catch (e) {
+          saveToLocalList(payload);
+        }
+      } else {
+        saveToLocalList(payload);
+      }
+
+      // Reset form
+      document.getElementById('mainInput').value = '';
+      document.getElementById('clipTag').value = '';
+      selectedFileBase64 = null;
+      recordedAudioBase64 = null;
+      document.getElementById('fileLabel').innerText = 'اضغط هنا لرفع صورة أو ملف';
+      document.getElementById('audioPreview').classList.add('hidden');
+    }
+
+    function saveToLocalList(item) {
+      item.id = Date.now().toString();
+      localClips.unshift(item);
+      saveLocalBackup();
+      renderClips();
+      showToast('تم الحفظ في التخزين المحلي');
+    }
+
+    function saveLocalBackup() {
+      localStorage.setItem('cloud_clipboard_data', JSON.stringify(localClips));
+    }
+
+    // Filter Logic
+    function setFilter(filter) {
+      activeFilter = filter;
+      document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.className = 'filter-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap liquid-input text-slate-400 hover:text-white flex items-center gap-1.5';
+      });
+      const activeBtn = document.getElementById(`filter-${filter}`);
+      if (activeBtn) {
+        activeBtn.className = 'filter-pill active px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-sky-600 text-white shadow-lg shadow-sky-600/30 flex items-center gap-1.5';
+      }
+      renderClips();
+    }
+
+    // Render Cards
+    function renderClips() {
+      const grid = document.getElementById('clipsGrid');
+      const empty = document.getElementById('emptyState');
+      const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      let items = localClips.filter(c => {
+        if (activeFilter === 'trash') return c.inTrash;
+        if (c.inTrash) return false;
+
+        if (activeFilter === 'pinned') return c.pinned;
+        if (activeFilter === 'text') return c.type === 'text';
+        if (activeFilter === 'code') return c.type === 'code';
+        if (activeFilter === 'media') return c.type === 'file' || c.type === 'voice';
+        return true;
+      });
+
+      if (searchVal) {
+        items = items.filter(i => 
+          (i.content && i.content.toLowerCase().includes(searchVal)) ||
+          (i.tag && i.tag.toLowerCase().includes(searchVal)) ||
+          (i.fileName && i.fileName.toLowerCase().includes(searchVal))
+        );
+      }
+
+      items.sort((a, b) => (b.pinned - a.pinned) || new Date(b.createdAt) - new Date(a.createdAt));
+
+      grid.innerHTML = '';
+      if (items.length === 0) {
+        empty.classList.remove('hidden');
+        empty.classList.add('flex');
+      } else {
+        empty.classList.add('hidden');
+        empty.classList.remove('flex');
+        items.forEach(item => grid.appendChild(createCardElement(item)));
+      }
+
+      Prism.highlightAll();
+    }
+
+    function createCardElement(item) {
+      const card = document.createElement('div');
+      card.className = `liquid-card rounded-2xl p-4 flex flex-col justify-between space-y-3 transition-all ${
+        item.pinned ? 'border-sky-500/50 ring-1 ring-sky-500/20' : ''
+      }`;
+
+      // Card Header
+      let typeBadge = '';
+      if (item.type === 'code') typeBadge = '💻 كود';
+      else if (item.type === 'file' || item.fileType === 'image') typeBadge = '🖼️ صورة/ملف';
+      else if (item.type === 'voice') typeBadge = '🎤 صوت';
+      else typeBadge = '📝 نص';
+
+      card.innerHTML = `
+        <div class="space-y-2">
+          <!-- Top Card Row -->
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-semibold">${typeBadge}</span>
+              ${item.tag ? `<span class="text-sky-400 font-medium">#${escapeHtml(item.tag)}</span>` : ''}
+            </div>
+
+            <div class="flex items-center gap-1">
+              <button onclick="togglePin('${item.id}')" class="p-1.5 hover:bg-slate-800 rounded-lg ${item.pinned ? 'text-amber-400' : 'text-slate-500'}" title="تثبيت">⭐</button>
+              <button onclick="moveToTrash('${item.id}')" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-rose-400" title="حذف">🗑️</button>
+            </div>
+          </div>
+
+          <!-- Card Main Content -->
+          <div class="pt-1">
+            ${renderCardBody(item)}
+          </div>
+        </div>
+
+        <!-- Card Bottom Bar -->
+        <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+          <span class="text-slate-500 text-[10px]">${formatDate(item.createdAt)}</span>
+          <div class="flex items-center gap-1">
+            ${item.type === 'text' || item.type === 'code' ? `
+              <button onclick="copyToClipboard('${escapeJs(item.content)}')" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold flex items-center gap-1 transition-all">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                <span>نسخ</span>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+
+      return card;
+    }
+
+    function renderCardBody(item) {
+      if (item.isLocked) {
+        return `
+          <div class="p-4 rounded-xl bg-slate-900/80 text-center space-y-2 border border-slate-800">
+            <span class="text-2xl">🔒</span>
+            <p class="text-xs text-slate-400">هذا العنصر محمي بقفل</p>
+            <button onclick="unlockCard('${item.id}')" class="px-3 py-1 rounded-lg bg-slate-800 text-sky-400 text-xs font-semibold">عرض المحتوى</button>
+          </div>
+        `;
+      }
+
+      if (item.type === 'code') {
+        return `<pre class="rounded-xl text-xs max-h-40 overflow-y-auto"><code class="language-javascript">${escapeHtml(item.content)}</code></pre>`;
+      } else if (item.fileType === 'image' || (item.content && item.content.startsWith('data:image'))) {
+        return `<img src="${item.content}" class="max-h-48 w-full object-cover rounded-xl border border-slate-800">`;
+      } else if (item.type === 'voice' || item.fileType === 'audio') {
+        return `<audio controls src="${item.content}" class="w-full h-10 rounded-lg"></audio>`;
+      } else if (item.type === 'file') {
+        return `
+          <a href="${item.content}" download="${item.fileName || 'file'}" class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs text-sky-400 hover:underline">
+            <span>📎 ${escapeHtml(item.fileName || 'تحميل الملف')}</span>
+            <span>⬇️</span>
+          </a>
+        `;
+      } else {
+        return `<p class="text-xs text-slate-200 whitespace-pre-wrap break-words leading-relaxed max-h-36 overflow-y-auto">${escapeHtml(item.content)}</p>`;
+      }
+    }
+
+    // Actions
+    function unlockCard(id) {
+      const pin = prompt('أدخل رقم الـ PIN لفتح هذا العنصر:');
+      if (pin) {
+        const item = localClips.find(c => c.id === id);
+        if (item) {
+          item.isLocked = false;
+          renderClips();
+        }
+      }
+    }
+
+    function togglePin(id) {
+      const item = localClips.find(c => c.id === id);
+      if (item) {
+        item.pinned = !item.pinned;
+        if (currentUser && db) {
+          db.collection('clips').doc(id).update({ pinned: item.pinned });
+        } else {
+          saveLocalBackup();
+          renderClips();
+        }
+      }
+    }
+
+    function moveToTrash(id) {
+      const item = localClips.find(c => c.id === id);
+      if (item) {
+        item.inTrash = true;
+        if (currentUser && db) {
+          db.collection('clips').doc(id).update({ inTrash: true });
+        } else {
+          saveLocalBackup();
+          renderClips();
+        }
+        showToast('تم نقل العنصر لسلة المهملات');
+      }
+    }
+
+    function copyToClipboard(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast('تم نسخ النص للحافظة!');
+      } catch (err) {
+        showToast('تعذر النسخ تلقائياً');
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function pasteFromClipboard() {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        navigator.clipboard.readText().then(text => {
+          document.getElementById('mainInput').value = text;
+          showToast('تم اللصق بنجاح');
+        }).catch(() => showToast('يرجى استخدام Ctrl+V للصق'));
+      } else {
+        showToast('اضغط Ctrl+V للصق المباشر');
+      }
+    }
+
+    function listenGlobalPaste() {
+      document.addEventListener('paste', e => {
+        if (document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
+          const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+          if (pastedText) {
+            document.getElementById('mainInput').value = pastedText;
+            showToast('تم التقاط النص من الحافظة!');
+          }
+        }
+      });
+    }
+
+    // Modal Helpers
+    function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); document.getElementById('authModal').classList.add('flex'); }
+    function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); document.getElementById('authModal').classList.remove('flex'); }
+    function showAppQR() {
+      const qrDiv = document.getElementById('qrcode');
+      qrDiv.innerHTML = '';
+      new QRCode(qrDiv, { text: window.location.href, width: 160, height: 160 });
+      document.getElementById('qrModal').classList.remove('hidden');
+      document.getElementById('qrModal').classList.add('flex');
+    }
+    function closeQRModal() { document.getElementById('qrModal').classList.add('hidden'); document.getElementById('qrModal').classList.remove('flex'); }
+
+    // Auth Actions
+    async function loginWithGoogle() {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+        closeAuthModal();
+        showToast('تم تسجيل الدخول بنجاح!');
+      } catch (e) {
+        showToast('خطأ في تسجيل الدخول بواسطة Google');
+      }
+    }
+
+    async function handleEmailAuth(e) {
+      e.preventDefault();
+      const email = document.getElementById('authEmail').value;
+      const pass = document.getElementById('authPass').value;
+      const action = e.submitter.value;
+
+      try {
+        if (action === 'signup') {
+          await auth.createUserWithEmailAndPassword(email, pass);
+          showToast('تم إنشاء الحساب بنجاح!');
+        } else {
+          await auth.signInWithEmailAndPassword(email, pass);
+          showToast('تم تسجيل الدخول!');
+        }
+        closeAuthModal();
+      } catch (err) {
+        showToast(err.message || 'خطأ في العملية');
+      }
     }
 
     function logout() {
       if (auth) auth.signOut();
-      showToast("تم تسجيل الخروج", "info");
+      showToast('تم تسجيل الخروج');
     }
 
-    /* Toast Notification System */
-    function showToast(message, type = "info") {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-
-      const colors = {
-        success: "bg-emerald-600 text-white",
-        error: "bg-rose-600 text-white",
-        warning: "bg-amber-500 text-white",
-        info: "bg-slate-800 text-white"
-      };
-
-      toast.className = `px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg pointer-events-auto transition duration-300 flex items-center gap-2 ${colors[type] || colors.info}`;
-      toast.innerHTML = `<span>${message}</span>`;
-
-      container.appendChild(toast);
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
       setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 2500);
     }
 
-    /* Utilities */
-    function isUrl(string) {
+    function formatDate(isoStr) {
       try {
-        const url = new URL(string);
-        return url.protocol === "http:" || url.protocol === "https:";
-      } catch (_) {
-        return false;
-      }
+        const d = new Date(isoStr);
+        return d.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      } catch (e) { return ''; }
     }
 
     function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    function formatTimeAgo(timestamp) {
-      if (!timestamp) return '';
-      const diff = Math.floor((Date.now() - timestamp) / 1000);
-      if (diff < 60) return 'الآن';
-      if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
-      if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
-      return `منذ ${Math.floor(diff / 86400)} يوم`;
+    function escapeJs(str) {
+      return (str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
     }
   </script>
 </body>
