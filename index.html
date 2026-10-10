@@ -130,6 +130,19 @@
         </div>
     </header>
 
+    <!-- Environment Warning Banner (Appears if opened locally via file:// or content://) -->
+    <div id="environmentWarning" class="hidden max-w-4xl mx-auto px-4 pt-4">
+        <div class="p-3 rounded-xl bg-amber-950/60 border border-amber-800/80 text-amber-200 text-xs flex items-start gap-2.5">
+            <svg class="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div>
+                <strong class="font-bold">تنبيه هام لتسجيل الدخول بـ Google:</strong>
+                <p class="mt-0.5 text-amber-300/90">أنت تفتح الملف محلياً (`file://` أو `content://`). تسجيل الدخول عبر Google يحتاج لفتح الموقع من رابط استضافة بروتوكول HTTP/HTTPS (مثل GitHub Pages على `https://a6-wz.github.io`). يمكنك استخدام البريد الإلكتروني في هذه الأثناء.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Container -->
     <main class="max-w-4xl mx-auto w-full px-4 py-6 space-y-6 flex-1">
 
@@ -166,7 +179,7 @@
                 </button>
             </div>
 
-            <!-- Code Language Selector (Shown only when 'code' tab is active) -->
+            <!-- Code Language Selector -->
             <div id="languageSelectorContainer" class="hidden flex items-center gap-2">
                 <label class="text-xs text-zinc-400 font-medium">لغة البرمجة:</label>
                 <select id="codeLanguage" class="glass-input text-xs rounded-xl px-3 py-1.5 text-white bg-zinc-900 border border-zinc-800 focus:border-zinc-600">
@@ -392,7 +405,7 @@
         let currentTab = 'text'; // 'text', 'code', 'file', 'audio'
         let currentFilter = 'all';
         let items = [];
-        let selectedFileData = null; // { url, name, type, size }
+        let selectedFileData = null;
         let mediaRecorder = null;
         let audioChunks = [];
         let isRecording = false;
@@ -402,11 +415,21 @@
 
         // --- App Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
+            checkProtocolEnvironment();
             initAuth();
             setupPasteListener();
             loadLocalBackup();
             generateWebsiteQR();
         });
+
+        // Check if app is opened directly as local file (file:// or content://)
+        function checkProtocolEnvironment() {
+            const protocol = window.location.protocol;
+            if (protocol !== 'http:' && protocol !== 'https:') {
+                const warnBanner = document.getElementById('environmentWarning');
+                if (warnBanner) warnBanner.classList.remove('hidden');
+            }
+        }
 
         // --- Auth Setup ---
         function initAuth() {
@@ -443,17 +466,38 @@
             document.getElementById('authModal').classList.add('hidden');
         }
 
+        // Fixed Google Sign-In Function with Detailed Protocol Checks & Fallback
         async function signInWithGoogle() {
+            const protocol = window.location.protocol;
+            if (protocol !== 'http:' && protocol !== 'https:') {
+                alert("⚠️ لا يمكن تسجيل الدخول عبر Google عند فتح الملف محلياً (file:// أو content://).
+
+يرجى فتح الموقع عبر رابط استضافة أونلاين (مثل GitHub Pages على https://a6-wz.github.io) أو تسجل الدخول باستخدام البريد الإلكتروني بالأسفل.");
+                return;
+            }
+
             const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+
             try {
                 await auth.signInWithPopup(provider);
                 closeAuthModal();
             } catch (error) {
                 console.warn("Popup error, trying redirect...", error);
+                if (error.code === 'auth/operation-not-supported-in-this-environment') {
+                    alert("⚠️ تسجيل الدخول بـ Google غير مدعوم في هذا المتصفح المحنلي. يرجى فتح رابط الموقع من متصفح Chrome أو Safari عبر رابط https://");
+                    return;
+                }
+                
+                if (error.code === 'auth/unauthorized-domain') {
+                    alert("⚠️ هذا النطاق غير مصرح به في Firebase Console. أضف نطاقك إلى Authorized Domains في إعدادات Firebase Authentication.");
+                    return;
+                }
+
                 try {
                     await auth.signInWithRedirect(provider);
                 } catch (err) {
-                    alert("تعذر تسجيل الدخول بـ Google: " + err.message);
+                    alert("تعذر تسجيل الدخول بـ Google: " + (err.message || err));
                 }
             }
         }
@@ -1023,7 +1067,9 @@
 
         function escapeJsString(str) {
             if (!str) return '';
-            return str.replace(/\\/g, '\\\\').replace(/'/g, "\'").replace(/\n/g, '\n');
+            return str.replace(/\/g, '\\').replace(/'/g, "'").replace(/
+/g, '
+');
         }
 
         function isValidUrl(str) {
