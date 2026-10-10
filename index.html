@@ -6,8 +6,8 @@
     <title>الحافظة السحابية الذكية</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Cairo -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Cairo & Fira Code -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Highlight.js for Code Highlighting -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -34,6 +34,7 @@
                     },
                     fontFamily: {
                         cairo: ['Cairo', 'sans-serif'],
+                        code: ['Fira Code', 'monospace']
                     }
                 }
             }
@@ -78,6 +79,15 @@
         .no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
+        }
+        /* Code Box Standard Styling */
+        pre code.hljs {
+            font-family: 'Fira Code', monospace !important;
+            font-size: 0.75rem !important;
+            line-height: 1.5 !important;
+            padding: 0.75rem !important;
+            background: #09090b !important;
+            border-radius: 0.75rem !important;
         }
     </style>
 </head>
@@ -183,13 +193,13 @@
             <div id="languageSelectorContainer" class="hidden flex items-center gap-2">
                 <label class="text-xs text-zinc-400 font-medium">لغة البرمجة:</label>
                 <select id="codeLanguage" class="glass-input text-xs rounded-xl px-3 py-1.5 text-white bg-zinc-900 border border-zinc-800 focus:border-zinc-600">
+                    <option value="html">HTML / XML</option>
                     <option value="javascript">JavaScript</option>
+                    <option value="css">CSS</option>
                     <option value="python">Python</option>
                     <option value="cpp">C++</option>
                     <option value="csharp">C#</option>
                     <option value="java">Java</option>
-                    <option value="html">HTML</option>
-                    <option value="css">CSS</option>
                     <option value="php">PHP</option>
                     <option value="sql">SQL</option>
                     <option value="json">JSON</option>
@@ -286,7 +296,6 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
-
                     <span id="submitBtnText">إضافة للحافظة</span>
                 </button>
             </div>
@@ -609,7 +618,6 @@
             document.getElementById('filePreview').classList.remove('hidden');
 
             try {
-                // Instantly generate base64 string so selectedFileData is ALWAYS valid immediately!
                 const base64Data = await readFileAsBase64(file);
                 selectedFileData = {
                     url: base64Data,
@@ -624,7 +632,6 @@
                 return;
             }
 
-            // Optional background upload to Firebase Storage if available
             try {
                 const storageRef = storage.ref(`uploads/${Date.now()}_${file.name}`);
                 const snapshot = await storageRef.put(file);
@@ -697,7 +704,8 @@
 
         // --- Item Save Logic ---
         async function saveItem() {
-            const mainInput = document.getElementById('mainInput').value.trim();
+            const rawInput = document.getElementById('mainInput').value;
+            const mainInput = rawInput.trim();
             const tag = document.getElementById('tagInput').value.trim();
             const expiryMinutes = parseInt(document.getElementById('expirySelect').value);
             const isPinLocked = document.getElementById('pinCheck').checked;
@@ -710,7 +718,7 @@
 
             let newItem = {
                 type: currentTab,
-                content: mainInput,
+                content: rawInput, // Preserve exact line breaks & HTML raw text without escaping yet
                 tag: tag ? (tag.startsWith('#') ? tag : '#' + tag) : '',
                 pinned: false,
                 pinLocked: isPinLocked,
@@ -812,13 +820,13 @@
 
             let typeBadge = '';
             if (item.type === 'code') {
-                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] font-mono text-zinc-300">${item.language || 'Code'}</span>`;
+                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] font-mono text-zinc-300">💻 ${item.language || 'Code'}</span>`;
             } else if (item.type === 'file') {
-                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">ملف / صورة</span>`;
+                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">📁 ملف / صورة</span>`;
             } else if (item.type === 'audio') {
-                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">صوت</span>`;
+                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">🎙️ صوت</span>`;
             } else {
-                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">نص</span>`;
+                typeBadge = `<span class="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">📝 نص</span>`;
             }
 
             const isLocked = item.pinLocked && !item.unlocked;
@@ -839,9 +847,22 @@
                 `;
             } else {
                 if (item.type === 'code') {
+                    // Code Block with Clean LTR Alignment, Safe Escaping & Expand/Collapse Toggle
+                    const safeCode = escapeHtml(item.content);
+                    const langClass = item.language ? `language-${item.language}` : 'language-plaintext';
                     cardContentHtml = `
-                        <div class="relative group">
-                            <pre class="rounded-xl p-3 bg-zinc-950 text-xs overflow-x-auto font-mono text-zinc-200 border border-zinc-800/80"><code>${escapeHtml(item.content)}</code></pre>
+                        <div class="space-y-1">
+                            <div class="relative group rounded-xl bg-zinc-950 border border-zinc-800 overflow-hidden" dir="ltr">
+                                <div id="codeBox-${item.id}" class="max-h-52 overflow-y-auto overflow-x-auto text-xs transition-all duration-300">
+                                    <pre class="m-0 p-0"><code class="${langClass}">${safeCode}</code></pre>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between pt-1 text-[11px]">
+                                <button onclick="toggleExpandCode('${item.id}')" id="expandBtn-${item.id}" class="text-zinc-400 hover:text-white font-medium transition flex items-center gap-1">
+                                    <span>توسيع الكود ↔️</span>
+                                </button>
+                                <span class="text-zinc-600 dir-ltr font-mono text-[10px]">${item.content ? item.content.split('\n').length : 0} أسدُر</span>
+                            </div>
                         </div>
                     `;
                 } else if (item.type === 'file' && item.file) {
@@ -883,7 +904,7 @@
                     if (isUrl) {
                         cardContentHtml = `
                             <div class="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800/80">
-                                <a href="${item.content}" target="_blank" rel="noopener" class="text-xs text-blue-400 hover:underline break-all flex items-center gap-1.5">
+                                <a href="${item.content}" target="_blank" rel="noopener" class="text-xs text-blue-400 hover:underline break-all flex items-center gap-1.5" dir="ltr">
                                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                     </svg>
@@ -925,13 +946,13 @@
                         <span>${formatDate(item.createdAt)}</span>
                         <div class="flex items-center gap-1">
                             ${item.type === 'text' ? `
-                                <button onclick="speakText('${escapeJsString(item.content)}')" title="قراءة صوتية" class="p-1 rounded hover:text-white transition">
+                                <button onclick="speakText(this)" data-content="${escapeHtml(item.content)}" title="قراءة صوتية" class="p-1 rounded hover:text-white transition">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
                                     </svg>
                                 </button>
                             ` : ''}
-                            <button onclick="copyContent('${escapeJsString(item.content || (item.file && item.file.url))}')" title="نسخ" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition font-semibold text-[10px] flex items-center gap-1">
+                            <button onclick="copyItemContent('${item.id}')" title="نسخ" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition font-semibold text-[10px] flex items-center gap-1">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                 </svg>
@@ -943,6 +964,20 @@
             `;
 
             return card;
+        }
+
+        function toggleExpandCode(id) {
+            const box = document.getElementById(`codeBox-${id}`);
+            const btn = document.getElementById(`expandBtn-${id}`);
+            if (!box || !btn) return;
+
+            if (box.classList.contains('max-h-52')) {
+                box.classList.remove('max-h-52');
+                btn.innerHTML = '<span>طَي الكود ⬆️</span>';
+            } else {
+                box.classList.add('max-h-52');
+                btn.innerHTML = '<span>توسيع الكود ↔️</span>';
+            }
         }
 
         function unlockCard(id, correctPin) {
@@ -958,17 +993,22 @@
             }
         }
 
-        async function copyContent(text) {
+        async function copyItemContent(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            let textToCopy = item.content || (item.file && item.file.url) || '';
             try {
-                await navigator.clipboard.writeText(text);
-                alert("تم النسخ إلى الحافظة بنجاح!");
+                await navigator.clipboard.writeText(textToCopy);
+                alert("تم النسخ بنجاح!");
             } catch (e) {
                 alert("تعذر النسخ التلقائي");
             }
         }
 
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
+        function speakText(btn) {
+            const text = btn.getAttribute('data-content');
+            if ('speechSynthesis' in window && text) {
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'ar-SA';
                 window.speechSynthesis.speak(utterance);
@@ -1079,11 +1119,6 @@
                       .replace(/>/g, "&gt;")
                       .replace(/"/g, "&quot;")
                       .replace(/'/g, "&#039;");
-        }
-
-        function escapeJsString(str) {
-            if (!str) return '';
-            return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
         }
 
         function isValidUrl(str) {
