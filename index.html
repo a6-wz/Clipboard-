@@ -111,7 +111,7 @@
 
                 <!-- Auth Buttons -->
                 <div id="authSection">
-                    <button id="loginBtn" onclick="openAuthModal()" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white text-black hover:bg-zinc-200 transition flex items-center gap-1.5 shadow">
+                    <button id="loginBtn" onclick="openAuthModal()" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-white text-black hover:bg-zinc-200 transition flex items-center gap-1.5 shadow cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                         </svg>
@@ -130,7 +130,7 @@
         </div>
     </header>
 
-    <!-- Environment Warning Banner (Appears if opened locally via file:// or content://) -->
+    <!-- Environment Warning Banner -->
     <div id="environmentWarning" class="hidden max-w-4xl mx-auto px-4 pt-4">
         <div class="p-3 rounded-xl bg-amber-950/60 border border-amber-800/80 text-amber-200 text-xs flex items-start gap-2.5">
             <svg class="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,7 +138,7 @@
             </svg>
             <div>
                 <strong class="font-bold">تنبيه هام لتسجيل الدخول بـ Google:</strong>
-                <p class="mt-0.5 text-amber-300/90">أنت تفتح الملف محلياً (`file://` أو `content://`). تسجيل الدخول عبر Google يحتاج لفتح الموقع من رابط استضافة بروتوكول HTTP/HTTPS (مثل GitHub Pages على `https://a6-wz.github.io`). يمكنك استخدام البريد الإلكتروني في هذه الأثناء.</p>
+                <p class="mt-0.5 text-amber-300/90">أنت تفتح الملف محلياً (file:// أو content://). تسجيل الدخول عبر Google يحتاج لفتح الموقع من رابط استضافة بروتوكول HTTP/HTTPS (مثل GitHub Pages على https://a6-wz.github.io). يمكنك استخدام البريد الإلكتروني في هذه الأثناء.</p>
             </div>
         </div>
     </div>
@@ -339,7 +339,7 @@
                 <p class="text-xs text-zinc-400">احفظ حافظتك ومزامنتها عبر جميع أجهزتك</p>
             </div>
 
-            <button onclick="signInWithGoogle()" class="w-full py-2.5 px-4 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition flex items-center justify-center gap-2 shadow">
+            <button onclick="signInWithGoogle()" class="w-full py-2.5 px-4 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition flex items-center justify-center gap-2 shadow cursor-pointer">
                 <svg class="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -402,7 +402,7 @@
 
         // State Variables
         let currentUser = null;
-        let currentTab = 'text'; // 'text', 'code', 'file', 'audio'
+        let currentTab = 'text';
         let currentFilter = 'all';
         let items = [];
         let selectedFileData = null;
@@ -422,7 +422,6 @@
             generateWebsiteQR();
         });
 
-        // Check if app is opened directly as local file (file:// or content://)
         function checkProtocolEnvironment() {
             const protocol = window.location.protocol;
             if (protocol !== 'http:' && protocol !== 'https:') {
@@ -459,20 +458,19 @@
         }
 
         function openAuthModal() {
-            document.getElementById('authModal').classList.remove('hidden');
+            const modal = document.getElementById('authModal');
+            if (modal) modal.classList.remove('hidden');
         }
 
         function closeAuthModal() {
-            document.getElementById('authModal').classList.add('hidden');
+            const modal = document.getElementById('authModal');
+            if (modal) modal.classList.add('hidden');
         }
 
-        // Fixed Google Sign-In Function with Detailed Protocol Checks & Fallback
         async function signInWithGoogle() {
             const protocol = window.location.protocol;
             if (protocol !== 'http:' && protocol !== 'https:') {
-                alert("⚠️ لا يمكن تسجيل الدخول عبر Google عند فتح الملف محلياً (file:// أو content://).
-
-يرجى فتح الموقع عبر رابط استضافة أونلاين (مثل GitHub Pages على https://a6-wz.github.io) أو تسجل الدخول باستخدام البريد الإلكتروني بالأسفل.");
+                alert("⚠️ لا يمكن تسجيل الدخول عبر Google عند فتح الملف محلياً (file:// أو content://).\n\nيرجى فتح الموقع عبر رابط استضافة أونلاين (مثل GitHub Pages على https://a6-wz.github.io) أو تسجيل الدخول باستخدام البريد الإلكتروني بالأسفل.");
                 return;
             }
 
@@ -485,7 +483,7 @@
             } catch (error) {
                 console.warn("Popup error, trying redirect...", error);
                 if (error.code === 'auth/operation-not-supported-in-this-environment') {
-                    alert("⚠️ تسجيل الدخول بـ Google غير مدعوم في هذا المتصفح المحنلي. يرجى فتح رابط الموقع من متصفح Chrome أو Safari عبر رابط https://");
+                    alert("⚠️ تسجيل الدخول بـ Google غير مدعوم في هذا المتصفح. يرجى فتح رابط الموقع عبر متصفح Chrome أو Safari عبر رابط https://");
                     return;
                 }
                 
@@ -1035,11 +1033,13 @@
         }
 
         function openQRModal() {
-            document.getElementById('qrModal').classList.remove('hidden');
+            const modal = document.getElementById('qrModal');
+            if (modal) modal.classList.remove('hidden');
         }
 
         function closeQRModal() {
-            document.getElementById('qrModal').classList.add('hidden');
+            const modal = document.getElementById('qrModal');
+            if (modal) modal.classList.add('hidden');
         }
 
         function generateWebsiteQR() {
@@ -1067,9 +1067,7 @@
 
         function escapeJsString(str) {
             if (!str) return '';
-            return str.replace(/\/g, '\\').replace(/'/g, "'").replace(/
-/g, '
-');
+            return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
         }
 
         function isValidUrl(str) {
